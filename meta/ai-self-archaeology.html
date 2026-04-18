@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 协作自我考古 — 用你的 AI 对话数据做深度自我分析</title>
+<meta name="description" content="一个 4+3 层深度分析框架，从你和 AI 的全部对话历史中挖掘行为模式、认知盲点和可行动的洞察。">
+<style>
+:root {
+  --bg: #07070d;
+  --bg2: #0d0d18;
+  --bg3: #12122a;
+  --gold: #c8a04a;
+  --gold-dim: #8a6d2f;
+  --gold-glow: rgba(200,160,74,0.1);
+  --text: #ccc8be;
+  --text-dim: #706c62;
+  --accent: #e8c668;
+  --L1: #4a9; --L2: #59e; --L3: #a6e; --L4: #e84;
+  --D1: #e55; --D2: #5be; --D3: #ea0;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,'Segoe UI','Noto Sans SC',sans-serif;font-size:15px;line-height:1.75}
+::selection{background:var(--gold);color:var(--bg)}
+a{color:var(--gold);text-decoration:none}
+
+/* ===== HERO ===== */
+.hero{
+  min-height:100vh;display:flex;flex-direction:column;
+  justify-content:center;align-items:center;text-align:center;
+  padding:2rem;position:relative;overflow:hidden;
+}
+.hero::before{
+  content:'';position:absolute;
+  width:500px;height:500px;border-radius:50%;
+  background:radial-gradient(circle,var(--gold-glow),transparent 70%);
+  top:45%;left:50%;transform:translate(-50%,-50%);
+  animation:breathe 8s ease-in-out infinite;
+}
+@keyframes breathe{0%,100%{opacity:.2;transform:translate(-50%,-50%) scale(1)}50%{opacity:.45;transform:translate(-50%,-50%) scale(1.15)}}
+
+.hero h1{
+  font-size:clamp(1.8rem,4.5vw,3.2rem);font-weight:200;
+  color:var(--gold);letter-spacing:.12em;position:relative;
+}
+.hero .subtitle{
+  font-size:clamp(.85rem,1.8vw,1.05rem);color:var(--text-dim);
+  margin-top:.8rem;position:relative;max-width:520px;
+}
+.hero .hook{
+  margin-top:3rem;position:relative;
+  font-size:.88rem;color:var(--text-dim);
+  max-width:560px;line-height:2;
+}
+.hero .hook em{color:var(--accent);font-style:normal}
+.scroll-cue{
+  position:absolute;bottom:2rem;
+  color:var(--text-dim);font-size:.75rem;
+  animation:bob 2s ease-in-out infinite;
+}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(8px)}}
+
+/* ===== SECTION ===== */
+.sec{max-width:820px;margin:0 auto;padding:5rem 2rem}
+.sec-title{
+  font-size:1.3rem;color:var(--gold);font-weight:300;
+  letter-spacing:.08em;margin-bottom:.5rem;
+}
+.sec-lead{font-size:.85rem;color:var(--text-dim);margin-bottom:2.5rem}
+
+/* ===== PROBLEM ===== */
+.problem-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin:2rem 0;
+}
+.problem-card{
+  padding:1.5rem;border-radius:8px;
+  border:1px solid rgba(255,255,255,.05);
+}
+.problem-card.bad{background:rgba(200,60,60,.04);border-color:rgba(200,60,60,.12)}
+.problem-card.good{background:rgba(200,160,74,.04);border-color:rgba(200,160,74,.12)}
+.problem-card h3{font-size:.9rem;margin-bottom:.6rem;font-weight:500}
+.problem-card.bad h3{color:#c66}
+.problem-card.good h3{color:var(--accent)}
+.problem-card p{font-size:.8rem;color:var(--text-dim);line-height:1.7}
+
+/* ===== STACK ===== */
+.stack{display:flex;flex-direction:column;gap:0;margin:2rem 0}
+.layer{
+  border:1px solid rgba(255,255,255,.06);border-radius:8px;
+  overflow:hidden;cursor:pointer;transition:border-color .3s;
+  margin-bottom:-1px;
+}
+.layer:hover{border-color:rgba(255,255,255,.15)}
+.layer.open .layer-body{max-height:3000px;padding:1.5rem}
+.layer-head{
+  display:flex;align-items:center;padding:1rem 1.5rem;gap:1rem;
+  user-select:none;
+}
+.layer-num{font-size:1.6rem;font-weight:200;width:44px;text-align:center;flex-shrink:0}
+.layer-info{flex:1}
+.layer-name{font-size:1rem;font-weight:500}
+.layer-sub{font-size:.78rem;color:var(--text-dim);margin-top:.1rem}
+.layer-arrow{font-size:1.1rem;color:var(--text-dim);transition:transform .3s;flex-shrink:0}
+.layer.open .layer-arrow{transform:rotate(180deg)}
+.layer-body{
+  max-height:0;overflow:hidden;padding:0 1.5rem;
+  transition:max-height .4s ease,padding .3s ease;
+  background:rgba(0,0,0,.25);border-top:1px solid rgba(255,255,255,.03);
+}
+
+/* Prompt block */
+.prompt{
+  background:var(--bg);border:1px solid rgba(255,255,255,.06);
+  border-radius:6px;padding:1.3rem;margin:.8rem 0;
+  font-family:'SF Mono','Fira Code','Consolas',monospace;
+  font-size:.82rem;line-height:1.9;position:relative;
+  white-space:pre-wrap;
+}
+.prompt strong{color:var(--accent)}
+.why-box{
+  font-size:.82rem;color:var(--text-dim);margin-top:1.2rem;
+  padding-top:1rem;border-top:1px solid rgba(255,255,255,.04);
+  line-height:1.8;
+}
+.why-box strong{color:var(--text)}
+.why-box em{color:var(--accent);font-style:normal}
+
+/* Copy btn */
+.copy-btn{
+  position:absolute;top:.6rem;right:.6rem;
+  background:rgba(200,160,74,.12);border:1px solid var(--gold-dim);
+  color:var(--gold);font-size:.68rem;padding:.15rem .55rem;
+  border-radius:3px;cursor:pointer;transition:background .2s;
+}
+.copy-btn:hover{background:rgba(200,160,74,.25)}
+.copy-btn.ok{background:rgba(74,170,130,.25);color:var(--L1);border-color:var(--L1)}
+
+/* Layer color coding */
+.c1 .layer-head{background:rgba(68,170,153,.05)} .c1 .layer-num,.c1 .layer-name{color:var(--L1)}
+.c2 .layer-head{background:rgba(85,153,238,.05)} .c2 .layer-num,.c2 .layer-name{color:var(--L2)}
+.c3 .layer-head{background:rgba(170,102,238,.05)} .c3 .layer-num,.c3 .layer-name{color:var(--L3)}
+.c4 .layer-head{background:rgba(238,136,68,.05)} .c4 .layer-num,.c4 .layer-name{color:var(--L4)}
+.d1 .layer-head{background:rgba(238,85,85,.05)} .d1 .layer-num,.d1 .layer-name{color:var(--D1)}
+.d2 .layer-head{background:rgba(85,187,238,.05)} .d2 .layer-num,.d2 .layer-name{color:var(--D2)}
+.d3 .layer-head{background:rgba(238,170,0,.05)} .d3 .layer-num,.d3 .layer-name{color:var(--D3)}
+
+/* Connector */
+.conn{text-align:center;padding:.4rem 0;color:var(--text-dim);font-size:.65rem;letter-spacing:.15em}
+
+/* ===== FULL PROMPT ===== */
+.full-wrap{
+  background:var(--bg2);border:1px solid rgba(200,160,74,.12);
+  border-radius:8px;overflow:hidden;margin:2rem 0;
+}
+.full-head{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:1rem 1.5rem;background:rgba(200,160,74,.04);
+  border-bottom:1px solid rgba(200,160,74,.08);cursor:pointer;
+}
+.full-head h3{color:var(--gold);font-weight:400;font-size:.95rem}
+.full-body{
+  padding:0 1.5rem;max-height:0;overflow:hidden;
+  transition:max-height .5s ease,padding .3s ease;
+  font-family:'SF Mono','Fira Code','Consolas',monospace;
+  font-size:.8rem;line-height:2;white-space:pre-wrap;
+}
+.full-body.show{max-height:8000px;padding:1.5rem}
+.full-body .mark{color:var(--gold);font-weight:bold}
+.full-body .q{color:var(--accent)}
+.full-body .em{color:#eee}
+
+/* ===== CASE STUDY ===== */
+.case-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1rem;margin:1.5rem 0}
+.case-card{
+  background:var(--bg2);border:1px solid rgba(255,255,255,.05);
+  border-radius:8px;padding:1.3rem;
+}
+.case-num{font-size:1.4rem;font-weight:200;color:var(--gold-dim);float:right}
+.case-title{font-size:.9rem;color:var(--accent);margin-bottom:.4rem}
+.case-body{font-size:.78rem;color:var(--text-dim);line-height:1.7}
+.case-body strong{color:var(--text)}
+
+/* ===== VARIANTS ===== */
+.var-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1.2rem;margin:1.5rem 0}
+.var-card{
+  background:var(--bg2);border:1px solid rgba(255,255,255,.05);
+  border-radius:8px;padding:1.2rem;
+}
+.var-card:hover{border-color:var(--gold-dim)}
+.var-title{color:var(--accent);font-size:.92rem;margin-bottom:.2rem}
+.var-when{font-size:.68rem;color:var(--text-dim);margin-bottom:.7rem}
+.var-prompt{
+  font-family:'SF Mono','Fira Code','Consolas',monospace;
+  font-size:.76rem;color:var(--text);background:var(--bg);
+  border-radius:4px;padding:.8rem;line-height:1.7;position:relative;
+}
+
+/* ===== COMPARE ===== */
+.cmp{width:100%;border-collapse:collapse;font-size:.82rem;margin:1.5rem 0}
+.cmp th{text-align:left;color:var(--gold);font-weight:400;padding:.6rem .8rem;border-bottom:1px solid rgba(200,160,74,.15);font-size:.72rem;letter-spacing:.08em}
+.cmp td{padding:.6rem .8rem;border-bottom:1px solid rgba(255,255,255,.03);color:var(--text-dim);vertical-align:top}
+.cmp td:first-child{color:var(--text);white-space:nowrap}
+.cmp .old{color:#866}
+.cmp .new{color:var(--accent)}
+
+/* ===== FOOTER ===== */
+.foot{text-align:center;padding:4rem 2rem 2rem;font-size:.72rem;color:var(--text-dim);border-top:1px solid rgba(255,255,255,.03)}
+
+@media(max-width:640px){
+  .problem-grid{grid-template-columns:1fr}
+  .layer-head{padding:.8rem 1rem}
+  .layer-num{font-size:1.2rem;width:32px}
+  .sec{padding:3rem 1.2rem}
+  .case-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<section class="hero">
+  <h1>AI 协作自我考古</h1>
+  <div class="subtitle">用你的 AI 对话数据做深度自我分析</div>
+  <div class="hook">
+    大多数人用 AI 做了几百次对话，却从未回头看一眼那些数据。<br>
+    但那些数据里藏着你自己都不知道的——<br>
+    <em>行为节律、认知盲点、决策质量、以及你和 AI 的关系如何改变了你自己。</em>
+  </div>
+  <div class="scroll-cue">↓ 展开框架</div>
+</section>
+
+<!-- PROBLEM -->
+<section class="sec">
+  <div class="sec-title">为什么需要这个</div>
+  <div class="sec-lead">你以为你知道自己怎么用 AI。数据说的是另一个故事。</div>
+
+  <div class="problem-grid">
+    <div class="problem-card bad">
+      <h3>普通回顾</h3>
+      <p>
+        "我做了什么项目"<br>
+        "我遇到了什么问题"<br>
+        "我学到了什么"<br><br>
+        问题：<strong>只能看到你已经知道的东西</strong>。记忆会美化过去，忽略失败，放大成功。
+      </p>
+    </div>
+    <div class="problem-card good">
+      <h3>自我考古</h3>
+      <p>
+        "数据显示我的时间实际花在了哪里"<br>
+        "哪些问题我在重复解决"<br>
+        "数据中反复缺席的话题是什么"<br><br>
+        差异：<strong>让数据说话，挖掘你认知边界之外的模式</strong>。
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- 4 LAYERS -->
+<section class="sec">
+  <div class="sec-title">四层分析架构</div>
+  <div class="sec-lead">从事实到行动，每一层都建立在前一层之上。</div>
+
+  <div class="stack">
+    <div class="layer c1" onclick="toggle(this)">
+      <div class="layer-head">
+        <div class="layer-num">L1</div>
+        <div class="layer-info"><div class="layer-name">事实还原</div><div class="layer-sub">发生了什么 — 用数据代替记忆</div></div>
+        <div class="layer-arrow">&#9662;</div>
+      </div>
+      <div class="layer-body">
+        <div class="prompt"><button class="copy-btn" onclick="event.stopPropagation();copy(this)">复制</button><strong>第一层：事实还原</strong>
+
+- 完整时间线：从第一天到今天，每个阶段做了什么、遇到什么问题、如何解决
+- 项目全景图：所有项目的状态、相互关系、投入程度</div>
+        <div class="why-box">
+          <strong>为什么需要这层：</strong>人的记忆会美化过去。你以为自己主要在做创造性工作，但数据可能显示 40% 的时间在调试基础设施。事实层用数据代替记忆，防止后面三层建立在错误的地基上。
+        </div>
+      </div>
+    </div>
+
+    <div class="conn">▽ 数据 → 模式</div>
+
+    <div class="layer c2" onclick="toggle(this)">
+      <div class="layer-head">
+        <div class="layer-num">L2</div>
+        <div class="layer-info"><div class="layer-name">行为模式挖掘</div><div class="layer-sub">"我看不到的" — 数据比自我叙事更诚实</div></div>
+        <div class="layer-arrow">&#9662;</div>
+      </div>
+      <div class="layer-body">
+        <div class="prompt"><button class="copy-btn" onclick="event.stopPropagation();copy(this)">复制</button><strong>第二层：行为模式挖掘（我看不到的）</strong>
+
+- 我的时间实际花在了哪里？和我认为的一致吗？
+- 我的创造周期是什么节律？冲刺多长、恢复多长、什么触发冲刺？
+- 我的注意力如何在项目之间迁移？迁移是主动选择还是被问题驱动？
+- 哪些问题反复出现？我是在解决新问题还是在重复解决旧问题？</div>
+        <div class="why-box">
+          <strong>关键设计：</strong><em>"我看不到的"</em>这五个字是整个框架最重要的修饰语。没有它，AI 只会总结你已经知道的事情。有了它，AI 被迫去寻找你认知边界之外的模式。
+          <br><br>
+          <strong>典型发现：</strong>某人以为自己的高产期是工作日白天，但数据显示 62% 的深度创造发生在 20:00-02:00。这不是一个有趣的统计——这是一个可以改变时间安排的行动信号。
+        </div>
+      </div>
+    </div>
+
+    <div class="conn">▽ 模式 → 认知</div>
+
+    <div class="layer c3" onclick="toggle(this)">
+      <div class="layer-head">
+        <div class="layer-num">L3</div>
+        <div class="layer-info"><div class="layer-name">认知进化分析</div><div class="layer-sub">思维如何变化 — 理解学习曲线的形状</div></div>
+        <div class="layer-arrow">&#9662;</div>
+      </div>
+      <div class="layer-body">
+        <div class="prompt"><button class="copy-btn" onclick="event.stopPropagation();copy(this)">复制</button><strong>第三层：认知进化分析</strong>
+
+- 我的提问方式如何演变？从中能推断出什么能力变化？
+- 挫败到突破的转化效率如何变化？什么加速了这个转化？
+- 哪些规则/铁律是从失败中锻造的？它们之后有没有真的预防了同类错误？
+- 我的认知盲点在哪里？数据中反复缺席的话题是什么？</div>
+        <div class="why-box">
+          <strong>为什么需要这层：</strong>L2 告诉你<em>做了什么</em>，L3 告诉你<em>思维发生了什么变化</em>。
+          <br><br>
+          例如：提问中的问句率从 32% 降到 14%，而指令率从 4% 升到 18%——这不是行为变化，是<strong>身份变化</strong>：从"向 AI 提问的学生"变成了"指挥 AI 执行的指挥官"。
+          <br><br>
+          <strong>最锋利的一刀：</strong>"数据中反复缺席的话题是什么"——在场的东西容易分析，<em>缺席的东西才暴露真正的盲点</em>。
+        </div>
+      </div>
+    </div>
+
+    <div class="conn">▽ 认知 → 行动</div>
+
+    <div class="layer c4" onclick="toggle(this)">
+      <div class="layer-head">
+        <div class="layer-num">L4</div>
+        <div class="layer-info"><div class="layer-name">可行动的洞察</div><div class="layer-sub">做什么、停什么 — 没有行动的分析是纸上谈兵</div></div>
+        <div class="layer-arrow">&#9662;</div>
+      </div>
+      <div class="layer-body">
+        <div class="prompt"><button class="copy-btn" onclick="event.stopPropagation();copy(this)">复制</button><strong>第四层：可行动的洞察</strong>
+
+- 基于以上分析，我下一步最应该做什么、最应该停止做什么？
+- 我的哪些行为模式在帮我、哪些在消耗我？
+- 如果用我自己的分析框架诊断这段时间的数据，结论是什么？</div>
+        <div class="why-box">
+          <strong>关键设计：</strong>"最应该<em>停止</em>做什么"往往比"最应该做什么"更有价值。大多数人不缺新想法——缺的是知道该停什么。
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 3 DEEP DIRECTIONS -->
+<section class="sec">
+  <div class="sec-title">三个深入方向</div>
+  <div class="sec-lead">从"回顾"升级为"考古"——挖掘行为背后的意图结构。</div>
+
+  <div class="stack">
+    <div class="layer d1" onclick="toggle(this)">
+      <div class="layer-head">
+        <div class="layer-num">D1</div>
+        <div class="layer-info"><div class="layer-name">意图-行为裂缝</div><div class="layer-sub">你说要去的地方 vs 你脚实际走的方向</div></div>
+        <div class="layer-arrow">&#9662;</div>
+      </div>
+      <div class="layer-body">
+        <div class="prompt"><button class="copy-btn" onclick="event.stopPropagation();copy(this)">复制</button><strong>意图-行为裂缝分析</strong>
+
+我声明的目标 vs 我实际投入的时间，裂缝在哪？
+这个裂缝是迷失，还是更真实的优先级在浮现？
+我嘴上说最重要的事，和数据显示我花时间最多的事，是同一件吗？</div>
+        <div class="why-box">
+          一个人说"我要健身"但每晚 11 点打开的是代码编辑器——这不是"缺乏自律"，这是<em>优先级的真实信号被自我叙事掩盖了</em>。
+          <br><br>
+          这个分析的力量在于——<strong>它不替你判断哪个是对的</strong>。它只是让裂缝变得可见，让你自己判断：是该修正行为去匹配目标，还是该修正目标去匹配行为。
+        </div>
+      </div>
+    </div>
+
+    <div class="layer d2" onclick="toggle(this)">
+      <div class="layer-head">
+        <div class="layer-num">D2</div>
+        <div class="layer-info"><div class="layer-name">人-AI 共演化</div><div class="layer-sub">你给 AI 写的规则，是你自己认知标准的镜像</div></div>
+        <div class="layer-arrow">&#9662;</div>
+      </div>
+      <div class="layer-body">
+        <div class="prompt"><button class="copy-btn" onclick="event.stopPropagation();copy(this)">复制</button><strong>人-AI 共演化分析</strong>
+
+我为 AI 制定的规则和约束，其实是我自己的认知标准的镜像。
+分析这些规则的演化，告诉我：我自己的思维纪律发生了什么变化？
+
+- AI 的哪些失败让我发现了自己以前也有的盲点？
+- 我给 AI 写的约束，有没有反过来改变了我独立思考时的习惯？
+- 人机协作的模式（授权程度、信任边界、纠错方式）如何演变？</div>
+        <div class="why-box">
+          当你写下"不允许在不确定的时候编造"给 AI 时，你同时在问自己：<em>我自己在不确定的时候，会不会也凭直觉填充？</em>
+          <br><br>
+          你给 AI 写的约束，本质是<strong>把隐性的认识论标准变成显性的可执行协议</strong>。这个过程本身就是一种自我进化——你在教 AI 的同时，在编码自己的思维纪律。
+        </div>
+      </div>
+    </div>
+
+    <div class="layer d3" onclick="toggle(this)">
+      <div class="layer-head">
+        <div class="layer-num">D3</div>
+        <div class="layer-info"><div class="layer-name">决策考古</div><div class="layer-sub">找出改变轨迹的分叉点，区分主动选择和被动反应</div></div>
+        <div class="layer-arrow">&#9662;</div>
+      </div>
+      <div class="layer-body">
+        <div class="prompt"><button class="copy-btn" onclick="event.stopPropagation();copy(this)">复制</button><strong>决策考古</strong>
+
+找出改变轨迹的 5-7 个关键分叉点。对每个分叉：
+- 是主动选择还是被动反应？
+- 决策时的信息是否充分？
+- 如果当时走了另一条路，可能会怎样？
+- 这个决策的质量，现在回头看如何评价？
+
+然后回答：
+- 我最好的决策和最差的决策有什么共同特征？
+- 哪些决策模式值得复用，哪些需要警惕？</div>
+        <div class="why-box">
+          大多数自我回顾只看"做了什么"，不看"在哪个岔路口选了哪条路"。但<strong>决策点才是杠杆点</strong>——改变一个决策可能改变整个后续轨迹。
+          <br><br>
+          <em>主动 vs 被动</em>的区分至关重要。如果你的大部分重要决策都是被动的（被问题拽进去的），说明你是在被问题牵着走，不是在主动导航。
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- COMPARISON -->
+<section class="sec">
+  <div class="sec-title">普通回顾 vs 自我考古</div>
+  <table class="cmp">
+    <tr><th>维度</th><th class="old">普通回顾</th><th class="new">自我考古</th></tr>
+    <tr><td>问什么</td><td class="old">发生了什么</td><td class="new">发生了什么 + 意味着什么</td></tr>
+    <tr><td>视角</td><td class="old">自己能看到的</td><td class="new">自己看不到的</td></tr>
+    <tr><td>深度</td><td class="old">描述（1层）</td><td class="new">事实→模式→认知→行动 + 意图裂缝·共演化·决策考古</td></tr>
+    <tr><td>产出</td><td class="old">全景图</td><td class="new">全景图 + 诊断 + 处方</td></tr>
+    <tr><td>偏见</td><td class="old">默认展示好的</td><td class="new">失败、浪费、盲点同等重要</td></tr>
+    <tr><td>自我关系</td><td class="old">未涉及</td><td class="new">意图-行为裂缝 + 人-AI 共演化</td></tr>
+  </table>
+</section>
+
+<!-- FULL PROMPT -->
+<section class="sec">
+  <div class="sec-title">完整提示词</div>
+  <div class="sec-lead">展开复制，直接粘贴到 Claude Code / ChatGPT / 任何 AI 工具中使用。</div>
+
+  <div class="full-wrap">
+    <div class="full-head" onclick="document.getElementById('fp').classList.toggle('show')">
+      <h3>点击展开完整提示词</h3>
+      <button class="copy-btn" id="cfb" onclick="event.stopPropagation();copyFull()">复制全文</button>
+    </div>
+    <div class="full-body" id="fp">
+<span class="em">用我的所有 AI 对话数据，做一个深度自我分析。不只是记录发生了什么——要挖掘我自己看不到的模式。</span>
+
+<span class="mark">【第一层：事实还原】</span>
+- 完整时间线：从第一天到今天，每个阶段做了什么、遇到什么问题、如何解决
+- 项目全景图：所有项目的状态、相互关系、投入程度
+
+<span class="mark">【第二层：行为模式挖掘（我看不到的）】</span>
+<span class="q">- 我的时间实际花在了哪里？和我认为的一致吗？</span>
+<span class="q">- 我的创造周期是什么节律？冲刺多长、恢复多长、什么触发冲刺？</span>
+<span class="q">- 我的注意力如何在项目之间迁移？迁移是主动选择还是被问题驱动？</span>
+<span class="q">- 哪些问题反复出现？我是在解决新问题还是在重复解决旧问题？</span>
+
+<span class="mark">【第三层：认知进化分析】</span>
+<span class="q">- 我的提问方式如何演变？从中能推断出什么能力变化？</span>
+<span class="q">- 挫败到突破的转化效率如何变化？什么加速了这个转化？</span>
+<span class="q">- 哪些规则是从失败中锻造的？它们之后有没有真的预防了同类错误？</span>
+<span class="q">- 我的认知盲点在哪里？数据中反复缺席的话题是什么？</span>
+
+<span class="mark">【第四层：可行动的洞察】</span>
+<span class="q">- 基于以上分析，我下一步最应该做什么、最应该停止做什么？</span>
+<span class="q">- 我的哪些行为模式在帮我、哪些在消耗我？</span>
+
+<span class="mark">【深入方向 A：意图-行为裂缝】</span>
+<span class="q">- 我声明的目标 vs 我实际投入的时间，裂缝在哪？</span>
+<span class="q">- 这个裂缝是迷失，还是更真实的优先级在浮现？</span>
+
+<span class="mark">【深入方向 B：人-AI 共演化】</span>
+<span class="q">- 我为 AI 制定的规则，其实是我自己的认知标准的镜像。分析规则的演化，告诉我：我的思维纪律发生了什么变化？</span>
+<span class="q">- AI 的哪些失败让我发现了自己以前也有的盲点？</span>
+
+<span class="mark">【深入方向 C：决策考古】</span>
+<span class="q">- 找出改变轨迹的 5-7 个关键分叉点。每个分叉：是主动选择还是被动反应？</span>
+<span class="q">- 我最好的决策和最差的决策有什么共同特征？</span>
+
+<span class="mark">【输出要求】</span>
+<span class="em">- 每个洞察必须有数据支撑（精确数字，不是"大约"）</span>
+<span class="em">- 不要只展示好的——失败、浪费、盲点和好的一样重要</span></div>
+  </div>
+</section>
+
+<!-- CASE STUDY -->
+<section class="sec">
+  <div class="sec-title">实战案例：166 天的 8 个发现</div>
+  <div class="sec-lead">首次使用此框架分析 166 天 × 1733 条 Claude Code 对话数据。</div>
+  <div class="case-grid">
+    <div class="case-card"><div class="case-num">01</div><div class="case-title">夜行者模式</div><div class="case-body"><strong>23:00 是全天最高峰</strong>（192 条消息），62% 的对话发生在 20:00-02:00。夜间消息更长、问题更深。</div></div>
+    <div class="case-card"><div class="case-num">02</div><div class="case-title">9 天马拉松</div><div class="case-body">连续 9 天 × 近 24h 协作，<strong>936 条消息</strong>。节律：冲刺 3-4 天 → 半天喘息 → 再冲刺。</div></div>
+    <div class="case-card"><div class="case-num">03</div><div class="case-title">挫败→突破飞轮</div><div class="case-body">转化率从 <strong>33% → 200%</strong>。3/15 是转折点：首次突破产出超过挫败输入。积累的规则开始预防新挫败。</div></div>
+    <div class="case-card"><div class="case-num">04</div><div class="case-title">63 天沉默</div><div class="case-body">两个月零消息，回归后爆发量是之前的 <strong>15 倍</strong>。蓄力-爆发型创造周期。沉默不是放弃，是地下积聚。</div></div>
+    <div class="case-card"><div class="case-num">05</div><div class="case-title">提问进化</div><div class="case-body">问句率 20% → 32% → <strong>14%</strong>。指令率 10% → 4% → <strong>18%</strong>。从"问 AI 是什么"到"告诉 AI 做什么"。</div></div>
+    <div class="case-card"><div class="case-num">06</div><div class="case-title">注意力四阶段</div><div class="case-body">基础设施 → 工具部署 → 产品设计 → 研究发现。<strong>每阶段掌握后自然让位给下一个。</strong></div></div>
+    <div class="case-card"><div class="case-num">07</div><div class="case-title">最大时间黑洞</div><div class="case-body">工具 ↔ 基础设施跳转 <strong>36 次</strong>——三分之一的时间不是在构建，是在修基础设施。</div></div>
+    <div class="case-card"><div class="case-num">08</div><div class="case-title">数据中的盲点</div><div class="case-body">1733 条消息中，<strong>健康、变现、日常关系、合作伙伴</strong>接近空白。你不关注的事，数据不会替你关注。</div></div>
+  </div>
+</section>
+
+<!-- VARIANTS -->
+<section class="sec">
+  <div class="sec-title">变体</div>
+  <div class="var-grid">
+    <div class="var-card">
+      <div class="var-title">轻量版</div>
+      <div class="var-when">5 分钟快速诊断</div>
+      <div class="var-prompt"><button class="copy-btn" onclick="copy(this)">复制</button>分析我的对话历史，告诉我三件事：
+1）我的时间实际花在了哪里
+2）哪些问题反复出现
+3）数据中缺席的话题是什么
+用精确数字。</div>
+    </div>
+    <div class="var-card">
+      <div class="var-title">月度复盘版</div>
+      <div class="var-when">每月追踪演变趋势</div>
+      <div class="var-prompt"><button class="copy-btn" onclick="copy(this)">对比上次分析到现在：
+- 哪些模式改善了
+- 哪些恶化了
+- 出现了什么新模式
+- 意图-行为裂缝扩大还是缩小了</div>
+    </div>
+    <div class="var-card">
+      <div class="var-title">跨工具版</div>
+      <div class="var-when">适配任何 AI 工具</div>
+      <div class="var-prompt"><button class="copy-btn" onclick="copy(this)">用我在[工具名]上的所有使用数据，做 4 层自我分析：
+事实→模式→认知→行动。
+重点挖掘我看不到的行为模式和认知盲点。
+不要只展示好的。</div>
+    </div>
+  </div>
+</section>
+
+<div class="foot">
+  AI 协作自我考古 · 4+3 层深度分析框架<br>
+  从 166 天 × 1733 条对话的实战中提炼 · Zhengwen Ge
+</div>
+
+<script>
+function toggle(el){el.classList.toggle('open')}
+function copy(btn){
+  const block=btn.parentElement;
+  const text=block.innerText.replace(/^复制(全文)?/,'').trim();
+  navigator.clipboard.writeText(text).then(()=>{
+    btn.textContent='已复制';btn.classList.add('ok');
+    setTimeout(()=>{btn.textContent='复制';btn.classList.remove('ok')},2000);
+  });
+}
+function copyFull(){
+  const text=document.getElementById('fp').innerText.trim();
+  navigator.clipboard.writeText(text).then(()=>{
+    const b=document.getElementById('cfb');
+    b.textContent='已复制';b.classList.add('ok');
+    setTimeout(()=>{b.textContent='复制全文';b.classList.remove('ok')},2000);
+  });
+}
+</script>
+</body>
+</html>
