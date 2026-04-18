@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>风水 ⇄ 设计 · 翻译手册</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+:root{--bg:#07080c;--bg2:#161822;--bg3:#1c1f2e;--g:#c8a44e;--gl:#e8cc6a;--t:#e8e4dc;--t2:#9a968e;--t3:#5a5750;--bd:rgba(200,164,78,.1);--r:#e85454;--grn:#4ecb8d;--blu:#5b8def;--org:#f0a050;--pur:#a78bfa}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter','Noto Serif SC',system-ui,sans-serif;background:var(--bg);color:var(--t);line-height:1.9;font-size:14px}
+.ct{max-width:900px;margin:0 auto;padding:0 24px}
+section{padding:48px 0;border-top:1px solid var(--bd)}
+
+.hero{padding:72px 24px 40px;text-align:center}
+.hero h1{font-family:'Noto Serif SC',serif;font-size:clamp(24px,4vw,38px);font-weight:700;margin-bottom:12px}
+.hero h1 .a{color:var(--org)}.hero h1 .b{color:var(--blu)}
+.hero-sub{font-size:14px;color:var(--t2);max-width:520px;margin:0 auto}
+
+.sh{margin-bottom:24px}
+.st{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--g);margin-bottom:6px}
+.s-title{font-family:'Noto Serif SC',serif;font-size:22px;font-weight:700;margin-bottom:6px}
+.s-desc{color:var(--t2);font-size:13px}
+
+/* Translation pair */
+.tr-pair{display:grid;grid-template-columns:1fr 40px 1fr;gap:0;margin-bottom:14px;align-items:stretch}
+.tr-l,.tr-r{padding:16px;border-radius:10px;border:1px solid var(--bd)}
+.tr-l{background:rgba(240,160,80,.04);border-top:2px solid var(--org)}
+.tr-r{background:rgba(91,141,239,.04);border-top:2px solid var(--blu)}
+.tr-l h4{color:var(--org);font-size:16px;font-family:'Noto Serif SC',serif;margin-bottom:6px}
+.tr-r h4{color:var(--blu);font-size:16px;margin-bottom:6px}
+.tr-l p,.tr-r p{font-size:13px;color:var(--t2);line-height:1.8}
+.tr-m{display:flex;align-items:center;justify-content:center;color:var(--g);font-size:18px;font-weight:700}
+.tr-example{margin-top:8px;padding:10px;background:rgba(200,164,78,.06);border-radius:6px;font-size:12px;color:var(--gl);line-height:1.7}
+.tr-example strong{color:var(--t)}
+
+/* Scenario */
+.scenario{background:var(--bg2);border:1px solid var(--bd);border-radius:12px;padding:20px;margin-bottom:14px}
+.scenario h3{font-size:15px;font-weight:700;color:var(--gl);margin-bottom:10px}
+.scenario-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.scenario-col h5{font-size:11px;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px}
+.scenario-col.fs h5{color:var(--org)}
+.scenario-col.ds h5{color:var(--blu)}
+.scenario-col p{font-size:13px;color:var(--t2);line-height:1.8}
+.scenario-bridge{grid-column:1/-1;margin-top:8px;padding:10px;background:rgba(78,203,141,.06);border-radius:6px;border-left:3px solid var(--grn);font-size:12px;color:var(--grn);line-height:1.7}
+
+/* Five element mapping */
+.elem-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:16px}
+.elem-card{background:var(--bg2);border:1px solid var(--bd);border-radius:10px;padding:14px;text-align:center}
+.elem-card h4{font-size:20px;margin-bottom:4px}
+.elem-card .fs-name{font-size:12px;color:var(--org);margin-bottom:6px}
+.elem-card .ds-name{font-size:12px;color:var(--blu);margin-bottom:8px}
+.elem-card p{font-size:11px;color:var(--t3);line-height:1.6}
+.elem-card ul{list-style:none;padding:0;font-size:11px;color:var(--t2);line-height:1.8;text-align:left}
+
+.hbox{background:var(--bg2);border:1px solid var(--bd);border-left:3px solid var(--g);border-radius:12px;padding:16px;margin-bottom:14px;font-size:13px}
+.hbox h3{font-size:14px;font-weight:700;margin-bottom:6px}
+.hbox p{color:var(--t2)}
+
+.footer{padding:32px 0;border-top:1px solid var(--bd);text-align:center;font-size:11px;color:var(--t3)}
+
+@media(max-width:768px){.tr-pair{grid-template-columns:1fr;gap:6px}.tr-m{transform:rotate(90deg);padding:4px}.scenario-grid{grid-template-columns:1fr}.elem-grid{grid-template-columns:repeat(2,1fr)}}
+@media print{*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}}
+</style>
+</head>
+<body>
+<div class="ct">
+
+<header class="hero">
+  <h1><span class="a">风水</span> ⇄ <span class="b">设计</span></h1>
+  <p class="hero-sub">同一个空间现象，两套描述语言<br>给孔肖亚的翻译手册 — 看完即懂，无需学风水</p>
+</header>
+
+<!-- ===== PART 1: 核心概念翻译 ===== -->
+<section>
+  <div class="sh">
+    <div class="st">Part 01</div>
+    <h2 class="s-title">核心概念 · 一对一翻译</h2>
+    <p class="s-desc">左边是风水说法，右边是你已经知道的设计概念</p>
+  </div>
+
+  <div class="tr-pair">
+    <div class="tr-l">
+      <h4>气</h4>
+      <p>看不见但能感受到的空间能量。好空间"气顺"，差空间"气滞"或"气散"。</p>
+    </div>
+    <div class="tr-m">＝</div>
+    <div class="tr-r">
+      <h4>空间体验感</h4>
+      <p>你走进一个空间，说不出哪里好但就是舒服——那就是"气顺"。说不出哪里差但就是想走——那就是"气滞"。</p>
+      <div class="tr-example"><strong>你平时怎么说：</strong>"这个空间的感觉不对" "氛围不通透" "待着不舒服"——你在描述的就是"气"。</div>
+    </div>
+  </div>
+
+  <div class="tr-pair">
+    <div class="tr-l">
+      <h4>气口</h4>
+      <p>气进入空间的入口。门是主气口，窗是辅气口。</p>
+    </div>
+    <div class="tr-m">＝</div>
+    <div class="tr-r">
+      <h4>空间序列的起点</h4>
+      <p>你做动线设计时，第一个考虑的就是"人从哪里进来，第一眼看到什么"——这就是气口。</p>
+      <div class="tr-example"><strong>设计语言：</strong>"入口的第一视觉落点" "玄关的视觉引导"</div>
+    </div>
+  </div>
+
+  <div class="tr-pair">
+    <div class="tr-l">
+      <h4>气乘风则散</h4>
+      <p>气遇到风就散了。空间太通透、太空旷，气留不住。</p>
+    </div>
+    <div class="tr-m">＝</div>
+    <div class="tr-r">
+      <h4>过度开放导致空间失焦</h4>
+      <p>你一定遇到过这种情况：客户说要"通透"，结果做出来全是玻璃和开放空间，人站在里面反而没有归属感。</p>
+      <div class="tr-example"><strong>你的经验：</strong>"太通透了没有主次" "空间没有重心" "人在里面飘" — 风水叫"气散"，你叫"空间失焦"。同一个问题。</div>
+    </div>
+  </div>
+
+  <div class="tr-pair">
+    <div class="tr-l">
+      <h4>界水则止</h4>
+      <p>气遇到水就停下来。水面、低洼处、视觉焦点能让气汇聚。</p>
+    </div>
+    <div class="tr-m">＝</div>
+    <div class="tr-r">
+      <h4>视觉锚点 / 空间焦点</h4>
+      <p>你在客厅设计一面主墙、一件雕塑、一盏重点照明——人的注意力停在那里不走了。</p>
+      <div class="tr-example"><strong>设计语言：</strong>"focal point" "视觉终点" "空间的锚"——你每天在做的事就是"界水则止"。</div>
+    </div>
+  </div>
+
+  <div class="tr-pair">
+    <div class="tr-l">
+      <h4>藏风聚气</h4>
+      <p>挡住让气散掉的风，创造让气汇聚的焦点。风水的终极目标。</p>
+    </div>
+    <div class="tr-m">＝</div>
+    <div class="tr-r">
+      <h4>围合感 + 焦点设计</h4>
+      <p>你设计一个客厅：沙发围合出一个"场"（藏风），中间放一个茶几或地毯定义中心（聚气）。这就是最标准的"藏风聚气"。</p>
+      <div class="tr-example"><strong>你已经在做：</strong>每一个成功的空间设计都在做"藏风聚气"——只是你没有用这个词。</div>
+    </div>
+  </div>
+
+  <div class="tr-pair">
+    <div class="tr-l">
+      <h4>靠山</h4>
+      <p>身后需要实墙、厚重家具或大幅画作，提供安全感。</p>
+    </div>
+    <div class="tr-m">＝</div>
+    <div class="tr-r">
+      <h4>瞭望-庇护理论（Prospect-Refuge）</h4>
+      <p>环境心理学的经典理论：人类本能地寻找"背后有遮挡、前方有视野"的位置。这就是为什么没有人喜欢背对着门坐。</p>
+      <div class="tr-example"><strong>直接经验：</strong>你做餐厅设计时，最好的座位永远是靠墙面对入口的那个。风水叫"靠山"，心理学叫"refuge"。</div>
+    </div>
+  </div>
+
+  <div class="tr-pair">
+    <div class="tr-l">
+      <h4>明堂</h4>
+      <p>正前方要开阔、留白，不能堵。</p>
+    </div>
+    <div class="tr-m">＝</div>
+    <div class="tr-r">
+      <h4>前景留白 / 呼吸空间</h4>
+      <p>你一定跟客户说过"这里不能放东西，要留出呼吸感"——明堂就是这个意思。</p>
+    </div>
+  </div>
+
+  <div class="tr-pair">
+    <div class="tr-l">
+      <h4>煞气</h4>
+      <p>尖角、直冲、压迫、反光等带来不适的空间要素。</p>
+    </div>
+    <div class="tr-m">＝</div>
+    <div class="tr-r">
+      <h4>空间攻击性 / 视觉噪音</h4>
+      <p>尖锐的桌角对着沙发（你会说"有攻击性"）、走廊直冲大门（你会说"没有缓冲"）、头顶横梁压在座位上（你会说"有压迫感"）。</p>
+      <div class="tr-example"><strong>你的直觉判断：</strong>凡是你觉得"这里让人不舒服"的设计，风水都叫"煞"。你的审美直觉和风水的煞气判断高度重合。</div>
+    </div>
+  </div>
+
+  <div class="tr-pair">
+    <div class="tr-l">
+      <h4>阴阳</h4>
+      <p>空间需要动静、明暗、冷暖的平衡。纯阳太刺激，纯阴太沉闷。</p>
+    </div>
+    <div class="tr-m">＝</div>
+    <div class="tr-r">
+      <h4>对比与平衡</h4>
+      <p>你做灯光设计：不会全用射灯（太阳），也不会全用氛围灯（太阴）。一定是主光+辅光+重点照明的层次——这就是阴阳平衡。</p>
+      <div class="tr-example"><strong>延伸到一切：</strong>硬材+软装、冷色+暖色、实墙+玻璃、高家具+低家具——你做的每一个"搭配"决策都是在调阴阳。</div>
+    </div>
+  </div>
+
+  <div class="tr-pair">
+    <div class="tr-l">
+      <h4>生克</h4>
+      <p>材质之间有"帮助"和"冲突"关系。相生=和谐，相克=冲突。</p>
+    </div>
+    <div class="tr-m">＝</div>
+    <div class="tr-r">
+      <h4>材质搭配的和谐与冲突</h4>
+      <p>大面积冷钢（金）旁边放一盆绿植（木）——你会觉得"缓和了"。这就是金克木但木也泄金。大面积石材（土）配深蓝织物（水）——你会觉得"打架了"。这就是土克水。</p>
+      <div class="tr-example"><strong>你的搭配直觉=五行生克。</strong>你凭经验知道"这两种材质放一起不对"，风水给出了为什么不对的分类系统。</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== PART 2: 五行=五种空间质感 ===== -->
+<section>
+  <div class="sh">
+    <div class="st">Part 02</div>
+    <h2 class="s-title">五行 = 五种空间质感</h2>
+    <p class="s-desc">不是五种"物质"，是五种"感受"</p>
+  </div>
+
+  <div class="elem-grid">
+    <div class="elem-card" style="border-top:2px solid #2e8b57">
+      <h4 style="color:#2e8b57">木</h4>
+      <div class="fs-name">生长、向上、舒展</div>
+      <div class="ds-name">有机感 · 生命力</div>
+      <ul>
+        <li>实木家具</li>
+        <li>绿色植物</li>
+        <li>竖向线条</li>
+        <li>藤编/草编</li>
+        <li>棉麻织物</li>
+        <li>绿色系</li>
+      </ul>
+    </div>
+    <div class="elem-card" style="border-top:2px solid #c44a3f">
+      <h4 style="color:#c44a3f">火</h4>
+      <div class="fs-name">上升、辐射、热烈</div>
+      <div class="ds-name">能量感 · 戏剧性</div>
+      <ul>
+        <li>暖色灯光</li>
+        <li>壁炉/烛光</li>
+        <li>三角/尖顶造型</li>
+        <li>红/橙/紫色系</li>
+        <li>皮革</li>
+        <li>强烈的重点照明</li>
+      </ul>
+    </div>
+    <div class="elem-card" style="border-top:2px solid #c4956a">
+      <h4 style="color:#c4956a">土</h4>
+      <div class="fs-name">稳定、承载、厚重</div>
+      <div class="ds-name">安全感 · 接地感</div>
+      <ul>
+        <li>石材/大理石</li>
+        <li>陶瓷/陶土</li>
+        <li>水平线条</li>
+        <li>方正造型</li>
+        <li>黄/棕/米色系</li>
+        <li>厚重地毯</li>
+      </ul>
+    </div>
+    <div class="elem-card" style="border-top:2px solid #d4d4d4">
+      <h4 style="color:#aaa">金</h4>
+      <div class="fs-name">收敛、肃穆、精致</div>
+      <div class="ds-name">精致感 · 秩序感</div>
+      <ul>
+        <li>金属家具/灯具</li>
+        <li>不锈钢/黄铜</li>
+        <li>圆弧造型</li>
+        <li>白/银/金色系</li>
+        <li>玻璃/镜面</li>
+        <li>极简硬线条</li>
+      </ul>
+    </div>
+    <div class="elem-card" style="border-top:2px solid #3a6e9e">
+      <h4 style="color:#3a6e9e">水</h4>
+      <div class="fs-name">流动、下沉、柔软</div>
+      <div class="ds-name">流动感 · 静谧感</div>
+      <ul>
+        <li>水景/鱼缸</li>
+        <li>深色家具</li>
+        <li>波浪/曲线造型</li>
+        <li>黑/深蓝色系</li>
+        <li>丝绒/丝绸</li>
+        <li>柔和漫射灯光</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="hbox">
+    <h3>翻译关键</h3>
+    <p>当你选择一张实木餐桌（木）配黄铜吊灯（金）时，风水说"金克木"——你的直觉可能也觉得"金属的冷硬压制了木头的温暖"。<br>
+    解法一样：中间加一个陶瓷花瓶（土）——土泄火生金、木克土泄木，三者形成缓冲。你平时叫"加一个过渡元素"，风水叫"通关"。<strong>同一个操作，两个名字。</strong></p>
+  </div>
+</section>
+
+<!-- ===== PART 3: 场景翻译 ===== -->
+<section>
+  <div class="sh">
+    <div class="st">Part 03</div>
+    <h2 class="s-title">六个真实场景 · 双语对照</h2>
+    <p class="s-desc">同一个设计决策，左边用风水说，右边用设计说</p>
+  </div>
+
+  <div class="scenario">
+    <h3>场景1：客厅沙发背后要不要做整面书柜</h3>
+    <div class="scenario-grid">
+      <div class="scenario-col fs">
+        <h5>风水怎么说</h5>
+        <p>沙发背后是"靠山位"，必须厚重稳固。整面实木书柜=最强靠山。书=文昌，山+文昌=事业有根基、学识有底蕴。绝对要做。</p>
+      </div>
+      <div class="scenario-col ds">
+        <h5>设计怎么说</h5>
+        <p>沙发背后做整面柜体可以：①提供心理安全感（Prospect-Refuge）②增加储物功能 ③创造视觉厚度和纵深。材质选深色实木，与沙发形成前轻后重的层次。</p>
+      </div>
+      <div class="scenario-bridge">
+        <strong>给客户说：</strong>"您的沙发背后我设计了整面胡桃木书柜——从空间心理学角度，人坐在这里会有天然的安全感和稳定感；从风水角度，这就是最标准的靠山局。两套逻辑指向同一个结论。"
+      </div>
+    </div>
+  </div>
+
+  <div class="scenario">
+    <h3>场景2：玄关该用什么灯光</h3>
+    <div class="scenario-grid">
+      <div class="scenario-col fs">
+        <h5>风水怎么说</h5>
+        <p>玄关是气口，需要阳气净化入门之气。暖色光=火=阳。冷白光=金水=阴。入门第一感受不能是"冷"和"暗"。灯光要暖、要亮、要向上。</p>
+      </div>
+      <div class="scenario-col ds">
+        <h5>设计怎么说</h5>
+        <p>玄关是空间序列的第一帧，决定了整个空间的情绪基调。色温3000K左右的暖光营造欢迎感，向上的洗墙灯拉高空间感，避免冷光源造成的疏离感。</p>
+      </div>
+      <div class="scenario-bridge">
+        <strong>给客户说：</strong>"玄关我选了3000K暖光洗墙灯——回家推开门的那一刻，光线是暖的、向上的、有迎接感的。从设计角度这是空间的'第一印象管理'，风水里叫'阳气迎门'。"
+      </div>
+    </div>
+  </div>
+
+  <div class="scenario">
+    <h3>场景3：主卧床头用什么材质的背景</h3>
+    <div class="scenario-grid">
+      <div class="scenario-col fs">
+        <h5>风水怎么说</h5>
+        <p>卧室属阴，要柔、要静、要暖。忌金属（金主肃杀）、忌镜面（反射扰气）、忌石材（太冷太硬）。最佳：织物软包（土性柔和）或木饰面（木性温生）。颜色要浅暖，忌深蓝大红。</p>
+      </div>
+      <div class="scenario-col ds">
+        <h5>设计怎么说</h5>
+        <p>卧室的核心功能是休息，材质选择要降低感官刺激。软包面料吸音降噪、触感温暖、视觉柔和。避免反光材质（镜面/高光金属）干扰睡眠。色彩心理学上，浅暖色调降低心率、促进褪黑素分泌。</p>
+      </div>
+      <div class="scenario-bridge">
+        <strong>两套逻辑推出完全相同的结论：</strong>床头用浅米色/驼色织物软包，配实木边框。风水说"阴柔聚气"，设计说"降低感官刺激促进睡眠"——给客户两套理由，不管他信哪套都指向同一个方案。
+      </div>
+    </div>
+  </div>
+
+  <div class="scenario">
+    <h3>场景4：餐厅选圆桌还是方桌</h3>
+    <div class="scenario-grid">
+      <div class="scenario-col fs">
+        <h5>风水怎么说</h5>
+        <p>圆=天=乾=团聚。圆桌聚气、无尖角煞。方桌=地=坤=稳固，适合正式场合。家庭聚餐选圆桌，商务宴请选方桌。</p>
+      </div>
+      <div class="scenario-col ds">
+        <h5>设计怎么说</h5>
+        <p>圆桌促进平等对话（无主位），适合家庭亲密氛围。方桌/长桌有明确的主从座位，适合正式社交。圆桌节省空间（相同面积容纳更多人），方桌视觉更整齐。</p>
+      </div>
+      <div class="scenario-bridge">
+        <strong>给客户说：</strong>"您家里经常一家人聚餐？圆桌更好——没有主位，谁坐哪儿都自然，聊天的时候每个人都能看到每个人。风水上叫'团聚局'，设计上叫'平等社交空间'。"
+      </div>
+    </div>
+  </div>
+
+  <div class="scenario">
+    <h3>场景5：走廊直冲大门怎么处理</h3>
+    <div class="scenario-grid">
+      <div class="scenario-col fs">
+        <h5>风水怎么说</h5>
+        <p>穿堂煞：气从门进来一路冲到底，不停留、不聚集，财气直泄。必须设屏障：玄关柜、屏风、转向装置。</p>
+      </div>
+      <div class="scenario-col ds">
+        <h5>设计怎么说</h5>
+        <p>长走廊直通入口会造成"隧道效应"——进门一览无余，没有空间层次，缺乏私密过渡。需要设置视觉缓冲：转折、半隔断、端景。</p>
+      </div>
+      <div class="scenario-bridge">
+        <strong>解法一模一样：</strong>在走廊端头设置一件陈设（雕塑/大型植物/艺术品）作为视觉终点+气流转向器。风水叫"化煞"，设计叫"端景设计"。你不需要学任何风水知识就已经会做这件事了。
+      </div>
+    </div>
+  </div>
+
+  <div class="scenario">
+    <h3>场景6：书房的灯光和家具布局</h3>
+    <div class="scenario-grid">
+      <div class="scenario-col fs">
+        <h5>风水怎么说</h5>
+        <p>书桌面前要"明堂"开阔（水=智慧），光线用偏冷的白光（水行）。座后要"靠山"（厚重书柜或实墙）。东北方是文昌位，此方位要强化。桌上忌利器、尖物（煞气扰心）。</p>
+      </div>
+      <div class="scenario-col ds">
+        <h5>设计怎么说</h5>
+        <p>书桌面前保持视线开阔减少压迫感，利于专注。工作区照度500lux+，色温4000-5000K促进清醒。座位后方实体墙/柜体提供心理安全感。桌面保持整洁减少视觉干扰。</p>
+      </div>
+      <div class="scenario-bridge">
+        <strong>对照一下：</strong>明堂=视线开阔，水=冷白光=清醒照明，靠山=背后有墙，忌利器=桌面整洁。<strong>结论100%重合。</strong>不同的是，风水加了一层"文昌位在东北"——这一条设计语言里没有对应物，属于风水的"增量价值"。
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== PART 4: 核心结论 ===== -->
+<section>
+  <div class="sh">
+    <div class="st">Part 04</div>
+    <h2 class="s-title">给孔肖亚的结论</h2>
+  </div>
+
+  <div class="hbox" style="border-left-color:var(--grn)">
+    <h3>你不需要"学风水"</h3>
+    <p>你已经在做风水了——每一个空间序列的设计、每一次材质搭配的判断、每一个灯光层次的决定，都和风水指向同一个结论。你缺的不是知识，是<strong>语言</strong>。<br><br>
+    风水给了你两样东西：<br>
+    <strong>1. 一套客户已经相信的话术体系</strong>——你跟华强北老板说"Prospect-Refuge Theory"他一脸茫然，你说"靠山位"他立刻懂了。<br>
+    <strong>2. 一个设计语言覆盖不到的增量</strong>——方位敏感性（文昌位、财位、桃花位）。这一层没有现代设计对应物，但客户在意。掌握这一层，你就比所有"纯设计师"多了一个维度。</p>
+  </div>
+
+  <div class="hbox" style="border-left-color:var(--org)">
+    <h3>你需要掌握的只有三件事</h3>
+    <p><strong>① 后天八卦九宫 + 每个方位的功能对应</strong><br>
+    （南=声望、北=事业、东=健康、西=子女、东南=财、西南=婚姻、东北=文昌、西北=贵人、中=根基）<br>
+    这是一张表，记住就行。<br><br>
+    <strong>② 五行生克 + 每个元素对应的材质/色彩/造型</strong><br>
+    （上面Part 02的五张卡片，就是全部了）<br><br>
+    <strong>③ 三条铁律</strong><br>
+    a. 某方位的五行属性 × 该位置放置的材质五行 → 必须相生或同类，不能相克<br>
+    b. 背后要实（靠山）、前方要空（明堂）、左要高（青龙）、右要低（白虎）<br>
+    c. 尖角冲人的地方必须化解（要么挡、要么转、要么用圆弧过渡）</p>
+  </div>
+
+  <div class="hbox" style="border-left-color:var(--blu)">
+    <h3>怎么跟客户说</h3>
+    <p>不需要装成风水大师。最有力的话术是：<br><br>
+    <strong>"我们的设计方法同时考虑现代空间心理学和东方空间哲学。您会发现，好的设计和好的风水在90%的情况下指向同一个结论——因为它们都在回答同一个问题：怎样的空间让人真正舒服。"</strong><br><br>
+    这句话对两类客户都有效：<br>
+    华强北老板听到"东方空间哲学"=这设计师懂风水 ✓<br>
+    腾讯高管听到"空间心理学"=这设计师有学术底子 ✓</p>
+  </div>
+</section>
+
+</div>
+
+<footer class="footer">
+  <div class="ct">
+    <p>为向限建筑 · 孔肖亚定制 · 2026.04</p>
+  </div>
+</footer>
+
+</body>
+</html>

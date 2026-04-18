@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>伏羲→文王 置换循环分解</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: #0a0a0f;
+  color: #c8b888;
+  font-family: 'Courier New', monospace;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+/* ── Header ── */
+.header {
+  text-align: center;
+  padding: 30px 20px 10px;
+  position: relative;
+  z-index: 10;
+}
+.header h1 {
+  font-size: 28px;
+  letter-spacing: 6px;
+  color: #d4a843;
+  text-shadow: 0 0 20px rgba(212,168,67,0.4);
+}
+.header .sub {
+  font-size: 13px;
+  color: #8a7a55;
+  margin-top: 6px;
+  letter-spacing: 2px;
+}
+
+/* ── Controls ── */
+.controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  flex-wrap: wrap;
+}
+.controls button {
+  background: rgba(212,168,67,0.1);
+  border: 1px solid rgba(212,168,67,0.3);
+  color: #d4a843;
+  padding: 8px 20px;
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.3s;
+  letter-spacing: 1px;
+}
+.controls button:hover {
+  background: rgba(212,168,67,0.25);
+  border-color: #d4a843;
+  box-shadow: 0 0 12px rgba(212,168,67,0.2);
+}
+.controls button.active {
+  background: rgba(212,168,67,0.3);
+  border-color: #d4a843;
+  box-shadow: 0 0 15px rgba(212,168,67,0.3);
+}
+.speed-control {
+  display: flex; align-items: center; gap: 6px;
+  color: #8a7a55; font-size: 12px;
+}
+.speed-control input[type="range"] {
+  width: 80px;
+  accent-color: #d4a843;
+}
+
+/* ── Main Canvas Area ── */
+.canvas-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 0 20px;
+  position: relative;
+}
+canvas#main {
+  display: block;
+}
+
+/* ── Cycle Info Panel ── */
+.info-panel {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  padding: 20px;
+  flex-wrap: wrap;
+}
+.cycle-card {
+  background: rgba(20,18,14,0.8);
+  border: 1px solid rgba(212,168,67,0.15);
+  padding: 14px 20px;
+  min-width: 200px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+.cycle-card:hover, .cycle-card.active {
+  border-color: var(--cc);
+  box-shadow: 0 0 20px var(--cg);
+}
+.cycle-card .label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 6px;
+}
+.cycle-card .len {
+  font-size: 24px;
+  font-weight: bold;
+}
+.cycle-card .detail {
+  font-size: 11px;
+  color: #8a7a55;
+  margin-top: 4px;
+}
+
+/* ── Step Log ── */
+.step-log {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 10px 20px 30px;
+}
+.step-log .title {
+  font-size: 12px;
+  color: #8a7a55;
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+}
+.step-log .log-content {
+  background: rgba(10,10,15,0.6);
+  border: 1px solid rgba(212,168,67,0.1);
+  padding: 12px 16px;
+  font-size: 12px;
+  line-height: 1.8;
+  max-height: 120px;
+  overflow-y: auto;
+  color: #a09060;
+}
+.step-log .log-content::-webkit-scrollbar { width: 4px; }
+.step-log .log-content::-webkit-scrollbar-thumb { background: rgba(212,168,67,0.3); }
+.step-log .highlight { color: #d4a843; font-weight: bold; }
+
+/* ── Legend ── */
+.legend {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  padding: 10px 20px;
+  font-size: 12px;
+}
+.legend span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.legend .dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>置换循环分解</h1>
+  <div class="sub">伏羲先天六十四卦序 → 文王后天六十四卦序 &nbsp;|&nbsp; σ = [52, 10, 2]</div>
+</div>
+
+<div class="controls">
+  <button id="btnPlay">▶ 播放</button>
+  <button id="btnStep">▸ 单步</button>
+  <button id="btnReset">↺ 重置</button>
+  <button id="btnAll">全部循环</button>
+  <button id="btnC1" class="active">循环1 (52)</button>
+  <button id="btnC2">循环2 (10)</button>
+  <button id="btnC3">循环3 (2)</button>
+  <div class="speed-control">
+    <span>速度</span>
+    <input type="range" id="speed" min="1" max="10" value="5">
+  </div>
+</div>
+
+<div class="legend">
+  <span><span class="dot" style="background:#e08040"></span> 循环1 (52卦)</span>
+  <span><span class="dot" style="background:#40b0e0"></span> 循环2 (10卦)</span>
+  <span><span class="dot" style="background:#c050d0"></span> 循环3 (2卦)</span>
+  <span><span class="dot" style="background:#333"></span> 未激活</span>
+</div>
+
+<div class="canvas-wrap">
+  <canvas id="main"></canvas>
+</div>
+
+<div class="info-panel">
+  <div class="cycle-card" id="card1" style="--cc:#e08040;--cg:rgba(224,128,64,0.2)">
+    <div class="label" style="color:#e08040">循环 1</div>
+    <div class="len" style="color:#e08040">52 卦</div>
+    <div class="detail">占全部64卦的 81.25%</div>
+  </div>
+  <div class="cycle-card" id="card2" style="--cc:#40b0e0;--cg:rgba(64,176,224,0.2)">
+    <div class="label" style="color:#40b0e0">循环 2</div>
+    <div class="len" style="color:#40b0e0">10 卦</div>
+    <div class="detail">占全部64卦的 15.625%</div>
+  </div>
+  <div class="cycle-card" id="card3" style="--cc:#c050d0;--cg:rgba(192,80,208,0.2)">
+    <div class="label" style="color:#c050d0">循环 3</div>
+    <div class="len" style="color:#c050d0">2 卦</div>
+    <div class="detail">占全部64卦的 3.125%</div>
+  </div>
+</div>
+
+<div class="step-log">
+  <div class="title">推演日志</div>
+  <div class="log-content" id="logContent">点击 [播放] 或 [单步] 开始置换循环动画推演…</div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+//  DATA: Fuxi → Wen Wang permutation
+// ═══════════════════════════════════════════
+const MAP = {
+  '111111':1,'000000':2,'100010':3,'010001':4,'111010':5,'010111':6,
+  '010000':7,'000010':8,'111011':9,'110111':10,'111000':11,'000111':12,
+  '101111':13,'111101':14,'001000':15,'000100':16,'100110':17,'011001':18,
+  '110000':19,'000011':20,'100101':21,'101001':22,'000001':23,'100000':24,
+  '100111':25,'111001':26,'100001':27,'011110':28,'010010':29,'101101':30,
+  '001110':31,'011100':32,'001111':33,'111100':34,'000101':35,'101000':36,
+  '101011':37,'110101':38,'001010':39,'010100':40,'110001':41,'100011':42,
+  '111110':43,'011111':44,'000110':45,'011000':46,'010110':47,'011010':48,
+  '101110':49,'011101':50,'100100':51,'001001':52,'001011':53,'110100':54,
+  '101100':55,'001101':56,'011011':57,'110110':58,'010011':59,'110010':60,
+  '110011':61,'001100':62,'101010':63,'010101':64
+};
+
+// 卦名 (文王序 1-64)
+const NAMES = [
+  '乾','坤','屯','蒙','需','讼','师','比','小畜','履',
+  '泰','否','同人','大有','谦','豫','随','蛊','临','观',
+  '噬嗑','贲','剥','复','无妄','大畜','颐','大过','坎','离',
+  '咸','恒','遁','大壮','晋','明夷','家人','睽','蹇','解',
+  '损','益','夬','姤','萃','升','困','井','革','鼎',
+  '震','艮','渐','归妹','丰','旅','巽','兑','涣','节',
+  '中孚','小过','既济','未济'
+];
+
+// Build permutation (0-indexed Fuxi → 0-indexed Wen Wang)
+const f2w = {};
+for (let i = 0; i < 64; i++) {
+  f2w[i] = MAP[i.toString(2).padStart(6,'0')] - 1;
+}
+const sigma = Array.from({length:64}, (_,i) => f2w[i]);
+
+// Decompose cycles
+const vis = new Set(), cycles = [];
+for (let i = 0; i < 64; i++) {
+  if (vis.has(i)) continue;
+  const c = []; let j = i;
+  while (!vis.has(j)) { vis.add(j); c.push(j); j = sigma[j]; }
+  cycles.push(c);
+}
+cycles.sort((a,b) => b.length - a.length);
+
+// Cycle membership: hexIndex → {cycleIdx, posInCycle}
+const membership = {};
+cycles.forEach((c, ci) => {
+  c.forEach((h, pi) => { membership[h] = {ci, pi}; });
+});
+
+// ═══════════════════════════════════════════
+//  HEXAGRAM RENDERING HELPERS
+// ═══════════════════════════════════════════
+function getHexBits(fuxiIdx) {
+  return fuxiIdx.toString(2).padStart(6,'0');
+}
+
+function drawHexagram(ctx, cx, cy, size, bits, color) {
+  const lineH = size * 0.12;
+  const gap = size * 0.06;
+  const w = size * 0.55;
+  const totalH = 6 * lineH + 5 * gap;
+  let y = cy - totalH / 2;
+  ctx.fillStyle = color;
+  // bits[0]=top line (line 6), bits[5]=bottom (line 1) — draw top to bottom
+  for (let i = 0; i < 6; i++) {
+    if (bits[i] === '1') {
+      // solid line
+      ctx.fillRect(cx - w/2, y, w, lineH);
+    } else {
+      // broken line
+      const segW = (w - gap * 1.2) / 2;
+      ctx.fillRect(cx - w/2, y, segW, lineH);
+      ctx.fillRect(cx + w/2 - segW, y, segW, lineH);
+    }
+    y += lineH + gap;
+  }
+}
+
+// ═══════════════════════════════════════════
+//  CANVAS SETUP
+// ═══════════════════════════════════════════
+const canvas = document.getElementById('main');
+const ctx = canvas.getContext('2d');
+const dpr = window.devicePixelRatio || 1;
+
+let W, H, CX, CY, R;
+function resize() {
+  W = Math.min(window.innerWidth - 40, 900);
+  H = W;
+  canvas.width = W * dpr;
+  canvas.height = H * dpr;
+  canvas.style.width = W + 'px';
+  canvas.style.height = H + 'px';
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  CX = W / 2;
+  CY = H / 2;
+  R = W * 0.4;
+}
+resize();
+window.addEventListener('resize', () => { resize(); draw(); });
+
+// Positions: 64 hexagrams on a circle (Fuxi order 0-63)
+function getPos(idx) {
+  const angle = (idx / 64) * Math.PI * 2 - Math.PI / 2;
+  return { x: CX + R * Math.cos(angle), y: CY + R * Math.sin(angle), angle };
+}
+
+// ═══════════════════════════════════════════
+//  COLORS
+// ═══════════════════════════════════════════
+const CYCLE_COLORS = ['#e08040', '#40b0e0', '#c050d0'];
+const CYCLE_GLOWS  = ['rgba(224,128,64,', 'rgba(64,176,224,', 'rgba(192,80,208,'];
+const DIM = '#2a2520';
+const INACTIVE = '#444';
+
+// ═══════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════
+let viewMode = 1;        // 0=all, 1/2/3=specific cycle
+let animStep = -1;       // current step in animation (-1 = not started)
+let playing = false;
+let animTimer = null;
+let hoverIdx = -1;       // hexagram under mouse
+let trailArrows = [];    // arrows to draw
+
+// ═══════════════════════════════════════════
+//  DRAWING
+// ═══════════════════════════════════════════
+function draw() {
+  ctx.clearRect(0, 0, W, H);
+
+  // Background glow at center
+  const grad = ctx.createRadialGradient(CX, CY, 0, CX, CY, R * 1.2);
+  grad.addColorStop(0, 'rgba(212,168,67,0.03)');
+  grad.addColorStop(1, 'transparent');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, W, H);
+
+  // Draw orbit ring
+  ctx.beginPath();
+  ctx.arc(CX, CY, R, 0, Math.PI * 2);
+  ctx.strokeStyle = 'rgba(212,168,67,0.08)';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  // Determine visible cycles
+  const visCycles = viewMode === 0 ? [0,1,2] : [viewMode - 1];
+
+  // Draw trail arrows (accumulated)
+  drawTrailArrows();
+
+  // Draw active animation arrow
+  if (animStep >= 0) {
+    const cyIdx = viewMode === 0 ? getCycleForGlobalStep(animStep).ci : viewMode - 1;
+    const cyc = cycles[cyIdx];
+    const localStep = viewMode === 0 ? getCycleForGlobalStep(animStep).local : animStep;
+    if (localStep < cyc.length) {
+      const from = cyc[localStep];
+      const to = cyc[(localStep + 1) % cyc.length];
+      drawAnimArrow(from, to, cyIdx);
+    }
+  }
+
+  // Draw hexagram nodes
+  for (let i = 0; i < 64; i++) {
+    const pos = getPos(i);
+    const mem = membership[i];
+    const inView = visCycles.includes(mem.ci);
+    const isActiveInStep = isNodeActiveAtStep(i);
+    const isHover = hoverIdx === i;
+    const nodeSize = W * 0.065;
+
+    // Node background circle
+    ctx.beginPath();
+    ctx.arc(pos.x, pos.y, nodeSize * 0.48, 0, Math.PI * 2);
+
+    if (isHover) {
+      ctx.fillStyle = 'rgba(212,168,67,0.2)';
+      ctx.fill();
+      ctx.strokeStyle = '#d4a843';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    } else if (isActiveInStep) {
+      ctx.fillStyle = CYCLE_GLOWS[mem.ci] + '0.15)';
+      ctx.fill();
+      ctx.strokeStyle = CYCLE_COLORS[mem.ci];
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      // Glow
+      ctx.shadowColor = CYCLE_COLORS[mem.ci];
+      ctx.shadowBlur = 12;
+      ctx.beginPath();
+      ctx.arc(pos.x, pos.y, nodeSize * 0.48, 0, Math.PI * 2);
+      ctx.strokeStyle = CYCLE_COLORS[mem.ci];
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+    } else if (inView) {
+      ctx.fillStyle = 'rgba(20,18,14,0.6)';
+      ctx.fill();
+      ctx.strokeStyle = CYCLE_GLOWS[mem.ci] + '0.3)';
+      ctx.lineWidth = 0.8;
+      ctx.stroke();
+    } else {
+      ctx.fillStyle = 'rgba(15,13,10,0.4)';
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(60,55,45,0.3)';
+      ctx.lineWidth = 0.5;
+      ctx.stroke();
+    }
+
+    // Hexagram glyph
+    const hexColor = isActiveInStep ? CYCLE_COLORS[mem.ci]
+                   : inView ? CYCLE_GLOWS[mem.ci] + '0.6)'
+                   : 'rgba(80,70,55,0.4)';
+    drawHexagram(ctx, pos.x, pos.y - nodeSize * 0.08, nodeSize, getHexBits(i), hexColor);
+
+    // Wen Wang number
+    const wenNum = f2w[i] + 1;
+    ctx.font = `${isHover ? 'bold ' : ''}${nodeSize * 0.28}px Courier New`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    ctx.fillStyle = isActiveInStep ? CYCLE_COLORS[mem.ci]
+                  : inView ? CYCLE_GLOWS[mem.ci] + '0.7)'
+                  : 'rgba(100,90,70,0.4)';
+    ctx.fillText(wenNum, pos.x, pos.y + nodeSize * 0.26);
+  }
+
+  // Hover tooltip
+  if (hoverIdx >= 0) drawTooltip(hoverIdx);
+
+  // Center info
+  drawCenterInfo();
+}
+
+function drawCenterInfo() {
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+
+  if (animStep < 0) {
+    ctx.font = '16px Courier New';
+    ctx.fillStyle = 'rgba(212,168,67,0.4)';
+    ctx.fillText('σ = [52, 10, 2]', CX, CY - 10);
+    ctx.font = '11px Courier New';
+    ctx.fillStyle = 'rgba(138,122,85,0.5)';
+    ctx.fillText('52 + 10 + 2 = 64', CX, CY + 12);
+  } else {
+    const cyIdx = viewMode === 0 ? getCycleForGlobalStep(animStep).ci : viewMode - 1;
+    const cyc = cycles[cyIdx];
+    const localStep = viewMode === 0 ? getCycleForGlobalStep(animStep).local : animStep;
+    const from = cyc[localStep];
+    const to = cyc[(localStep + 1) % cyc.length];
+
+    ctx.font = 'bold 18px Courier New';
+    ctx.fillStyle = CYCLE_COLORS[cyIdx];
+    ctx.fillText(`${NAMES[f2w[from]]} → ${NAMES[f2w[to]]}`, CX, CY - 16);
+
+    ctx.font = '12px Courier New';
+    ctx.fillStyle = 'rgba(212,168,67,0.5)';
+    ctx.fillText(`第 ${f2w[from]+1} 卦 → 第 ${f2w[to]+1} 卦`, CX, CY + 8);
+
+    ctx.font = '11px Courier New';
+    ctx.fillStyle = 'rgba(138,122,85,0.5)';
+    const total = viewMode === 0 ? 64 : cyc.length;
+    const cur = viewMode === 0 ? animStep + 1 : localStep + 1;
+    ctx.fillText(`步骤 ${cur} / ${total}`, CX, CY + 28);
+  }
+}
+
+function isNodeActiveAtStep(fuxiIdx) {
+  if (animStep < 0) return false;
+  const mem = membership[fuxiIdx];
+  const visCycles = viewMode === 0 ? [0,1,2] : [viewMode - 1];
+  if (!visCycles.includes(mem.ci)) return false;
+
+  if (viewMode === 0) {
+    const info = getCycleForGlobalStep(animStep);
+    if (mem.ci !== info.ci) {
+      // Check if this node's cycle is already completed
+      let offset = 0;
+      for (let c = 0; c < mem.ci; c++) offset += cycles[c].length;
+      return animStep >= offset + cycles[mem.ci].length - 1;
+    }
+    const localStep = info.local;
+    return mem.pi <= localStep;
+  } else {
+    return mem.ci === viewMode - 1 && mem.pi <= animStep;
+  }
+}
+
+// ═══════════════════════════════════════════
+//  ARROWS
+// ═══════════════════════════════════════════
+function drawArrow(fromIdx, toIdx, color, alpha, width, animated) {
+  const p1 = getPos(fromIdx);
+  const p2 = getPos(toIdx);
+  const nodeR = W * 0.065 * 0.48;
+
+  // Shorten arrow to not overlap nodes
+  const dx = p2.x - p1.x, dy = p2.y - p1.y;
+  const dist = Math.sqrt(dx*dx + dy*dy);
+  if (dist < nodeR * 2) return;
+  const ux = dx/dist, uy = dy/dist;
+  const sx = p1.x + ux * nodeR * 1.1;
+  const sy = p1.y + uy * nodeR * 1.1;
+  const ex = p2.x - ux * nodeR * 1.1;
+  const ey = p2.y - uy * nodeR * 1.1;
+
+  // Curved arrow (bend toward center for aesthetics)
+  const mx = (sx + ex) / 2, my = (sy + ey) / 2;
+  const perpX = -(ey - sy), perpY = ex - sx;
+  const perpLen = Math.sqrt(perpX*perpX + perpY*perpY);
+  // Bend inward slightly
+  const bend = dist * 0.1;
+  const toCenterX = CX - mx, toCenterY = CY - my;
+  const tcLen = Math.sqrt(toCenterX*toCenterX + toCenterY*toCenterY) || 1;
+  const cpx = mx + (toCenterX/tcLen) * bend;
+  const cpy = my + (toCenterY/tcLen) * bend;
+
+  ctx.beginPath();
+  ctx.moveTo(sx, sy);
+  ctx.quadraticCurveTo(cpx, cpy, ex, ey);
+  ctx.strokeStyle = color;
+  ctx.globalAlpha = alpha;
+  ctx.lineWidth = width;
+
+  if (animated) {
+    ctx.setLineDash([6, 4]);
+    ctx.lineDashOffset = -performance.now() / 40;
+  }
+  ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.globalAlpha = 1;
+
+  // Arrowhead
+  const t = 0.95;
+  const ax = (1-t)*(1-t)*sx + 2*(1-t)*t*cpx + t*t*ex;
+  const ay = (1-t)*(1-t)*sy + 2*(1-t)*t*cpy + t*t*ey;
+  const adx = ex - ax, ady = ey - ay;
+  const aLen = Math.sqrt(adx*adx + ady*ady) || 1;
+  const aSize = 5 + width;
+  const headAngle = Math.atan2(ady, adx);
+
+  ctx.beginPath();
+  ctx.moveTo(ex, ey);
+  ctx.lineTo(ex - aSize * Math.cos(headAngle - 0.4), ey - aSize * Math.sin(headAngle - 0.4));
+  ctx.lineTo(ex - aSize * Math.cos(headAngle + 0.4), ey - aSize * Math.sin(headAngle + 0.4));
+  ctx.closePath();
+  ctx.fillStyle = color;
+  ctx.globalAlpha = alpha;
+  ctx.fill();
+  ctx.globalAlpha = 1;
+}
+
+function drawTrailArrows() {
+  trailArrows.forEach(a => {
+    drawArrow(a.from, a.to, a.color, 0.35, 1, false);
+  });
+}
+
+function drawAnimArrow(fromIdx, toIdx, cyIdx) {
+  drawArrow(fromIdx, toIdx, CYCLE_COLORS[cyIdx], 0.9, 2.5, true);
+}
+
+// ═══════════════════════════════════════════
+//  TOOLTIP
+// ═══════════════════════════════════════════
+function drawTooltip(fuxiIdx) {
+  const pos = getPos(fuxiIdx);
+  const wenNum = f2w[fuxiIdx] + 1;
+  const name = NAMES[wenNum - 1];
+  const mem = membership[fuxiIdx];
+  const bits = getHexBits(fuxiIdx);
+
+  const lines = [
+    `${name} (第${wenNum}卦)`,
+    `伏羲序: ${fuxiIdx}  二进制: ${bits}`,
+    `循环${mem.ci+1} 位置${mem.pi+1}/${cycles[mem.ci].length}`
+  ];
+
+  ctx.font = '12px Courier New';
+  const maxW = Math.max(...lines.map(l => ctx.measureText(l).width));
+  const pad = 10;
+  const lineH = 18;
+  const tw = maxW + pad * 2;
+  const th = lines.length * lineH + pad * 2;
+
+  let tx = pos.x + 20;
+  let ty = pos.y - th - 10;
+  if (tx + tw > W) tx = pos.x - tw - 20;
+  if (ty < 0) ty = pos.y + 20;
+
+  ctx.fillStyle = 'rgba(15,13,10,0.95)';
+  ctx.strokeStyle = CYCLE_COLORS[mem.ci];
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.roundRect(tx, ty, tw, th, 4);
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.fillStyle = '#c8b888';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'top';
+  lines.forEach((l, i) => {
+    ctx.fillStyle = i === 0 ? CYCLE_COLORS[mem.ci] : '#a09060';
+    ctx.fillText(l, tx + pad, ty + pad + i * lineH);
+  });
+}
+
+// ═══════════════════════════════════════════
+//  ANIMATION LOGIC
+// ═══════════════════════════════════════════
+function getCycleForGlobalStep(step) {
+  let offset = 0;
+  for (let ci = 0; ci < cycles.length; ci++) {
+    if (step < offset + cycles[ci].length) {
+      return { ci, local: step - offset };
+    }
+    offset += cycles[ci].length;
+  }
+  return { ci: 2, local: cycles[2].length - 1 };
+}
+
+function getMaxSteps() {
+  if (viewMode === 0) return 64;
+  return cycles[viewMode - 1].length;
+}
+
+function stepForward() {
+  const max = getMaxSteps();
+  if (animStep >= max - 1) {
+    stopAnim();
+    return;
+  }
+  animStep++;
+
+  // Add trail arrow
+  const cyIdx = viewMode === 0 ? getCycleForGlobalStep(animStep).ci : viewMode - 1;
+  const cyc = cycles[cyIdx];
+  const localStep = viewMode === 0 ? getCycleForGlobalStep(animStep).local : animStep;
+  const from = cyc[localStep];
+  const to = cyc[(localStep + 1) % cyc.length];
+
+  trailArrows.push({ from, to, color: CYCLE_COLORS[cyIdx] });
+
+  // Log
+  addLog(cyIdx, from, to, localStep, cyc.length);
+}
+
+function addLog(cyIdx, from, to, localStep, cycLen) {
+  const log = document.getElementById('logContent');
+  const wenFrom = f2w[from] + 1;
+  const wenTo = f2w[to] + 1;
+  const nameFrom = NAMES[wenFrom - 1];
+  const nameTo = NAMES[wenTo - 1];
+  const isClose = localStep === cycLen - 1;
+
+  const entry = document.createElement('div');
+  entry.innerHTML = `<span style="color:${CYCLE_COLORS[cyIdx]}">●</span> ` +
+    `循环${cyIdx+1} [${localStep+1}/${cycLen}] ` +
+    `<span class="highlight">${nameFrom}</span>(${wenFrom}) → ` +
+    `<span class="highlight">${nameTo}</span>(${wenTo})` +
+    (isClose ? ' <span style="color:#d4a843">◉ 闭合</span>' : '');
+  log.appendChild(entry);
+  log.scrollTop = log.scrollHeight;
+}
+
+function startAnim() {
+  if (playing) return;
+  playing = true;
+  document.getElementById('btnPlay').textContent = '⏸ 暂停';
+  tick();
+}
+
+function stopAnim() {
+  playing = false;
+  document.getElementById('btnPlay').textContent = '▶ 播放';
+  if (animTimer) { cancelAnimationFrame(animTimer); animTimer = null; }
+}
+
+let lastStepTime = 0;
+function tick() {
+  if (!playing) return;
+  const now = performance.now();
+  const speedVal = parseInt(document.getElementById('speed').value);
+  const interval = 1200 - speedVal * 100; // 1100ms ~ 200ms
+
+  if (now - lastStepTime > interval) {
+    stepForward();
+    lastStepTime = now;
+  }
+  animTimer = requestAnimationFrame(tick);
+}
+
+function resetAnim() {
+  stopAnim();
+  animStep = -1;
+  trailArrows = [];
+  document.getElementById('logContent').innerHTML = '点击 [播放] 或 [单步] 开始置换循环动画推演…';
+}
+
+// ═══════════════════════════════════════════
+//  RENDER LOOP
+// ═══════════════════════════════════════════
+function animate() {
+  draw();
+  requestAnimationFrame(animate);
+}
+animate();
+
+// ═══════════════════════════════════════════
+//  EVENT HANDLERS
+// ═══════════════════════════════════════════
+document.getElementById('btnPlay').addEventListener('click', () => {
+  if (playing) stopAnim(); else startAnim();
+});
+document.getElementById('btnStep').addEventListener('click', () => {
+  stopAnim();
+  stepForward();
+});
+document.getElementById('btnReset').addEventListener('click', resetAnim);
+
+function setView(mode) {
+  viewMode = mode;
+  resetAnim();
+  document.querySelectorAll('.controls button').forEach(b => b.classList.remove('active'));
+  const ids = ['btnAll','btnC1','btnC2','btnC3'];
+  document.getElementById(ids[mode]).classList.add('active');
+  // Update cards
+  document.querySelectorAll('.cycle-card').forEach((c,i) => {
+    c.classList.toggle('active', mode === 0 || mode === i + 1);
+  });
+}
+
+document.getElementById('btnAll').addEventListener('click', () => setView(0));
+document.getElementById('btnC1').addEventListener('click', () => setView(1));
+document.getElementById('btnC2').addEventListener('click', () => setView(2));
+document.getElementById('btnC3').addEventListener('click', () => setView(3));
+document.getElementById('card1').addEventListener('click', () => setView(1));
+document.getElementById('card2').addEventListener('click', () => setView(2));
+document.getElementById('card3').addEventListener('click', () => setView(3));
+
+// Mouse hover
+canvas.addEventListener('mousemove', (e) => {
+  const rect = canvas.getBoundingClientRect();
+  const mx = e.clientX - rect.left;
+  const my = e.clientY - rect.top;
+
+  hoverIdx = -1;
+  const hitR = W * 0.065 * 0.5;
+  for (let i = 0; i < 64; i++) {
+    const p = getPos(i);
+    const dx = mx - p.x, dy = my - p.y;
+    if (dx*dx + dy*dy < hitR*hitR) {
+      hoverIdx = i;
+      break;
+    }
+  }
+  canvas.style.cursor = hoverIdx >= 0 ? 'pointer' : 'default';
+});
+canvas.addEventListener('mouseleave', () => { hoverIdx = -1; });
+
+// Init card highlight
+setView(1);
+</script>
+</body>
+</html>

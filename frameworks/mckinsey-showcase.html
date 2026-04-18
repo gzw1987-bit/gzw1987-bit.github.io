@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>McKinsey 方法论引擎 — 展示</title>
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --bg2: #12121a;
+    --bg3: #1a1a25;
+    --gold: #c8a04a;
+    --gold-dim: #8b7035;
+    --gold-glow: rgba(200,160,74,0.15);
+    --copper: #b87333;
+    --text: #e0ddd5;
+    --text-dim: #8a8780;
+    --accent: #d4a853;
+    --border: #2a2a35;
+    --red: #c75050;
+    --green: #5ab878;
+    --blue: #5a8ec7;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'SF Pro Text', -apple-system, 'PingFang SC', 'Noto Sans SC', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+  ::selection { background: var(--gold); color: var(--bg); }
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--gold-dim); border-radius: 3px; }
+
+  /* Hero */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    position: relative;
+    padding: 2rem;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 600px; height: 600px;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle, var(--gold-glow) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero h1 {
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    font-weight: 300;
+    letter-spacing: 0.15em;
+    color: var(--gold);
+    margin-bottom: 0.5rem;
+    text-shadow: 0 0 40px rgba(200,160,74,0.3);
+  }
+  .hero .subtitle {
+    font-size: 1.1rem;
+    color: var(--text-dim);
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    margin-bottom: 3rem;
+  }
+  .hero .scroll-hint {
+    position: absolute;
+    bottom: 2rem;
+    animation: float 2s ease-in-out infinite;
+    color: var(--gold-dim);
+    font-size: 0.85rem;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+  }
+  @keyframes float {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(8px); }
+  }
+
+  /* Sections */
+  section {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 5rem 2rem;
+  }
+  .section-title {
+    font-size: 1.8rem;
+    font-weight: 300;
+    color: var(--gold);
+    letter-spacing: 0.08em;
+    margin-bottom: 0.5rem;
+  }
+  .section-subtitle {
+    color: var(--text-dim);
+    font-size: 0.9rem;
+    margin-bottom: 3rem;
+    letter-spacing: 0.05em;
+  }
+
+  /* Process Flow */
+  .process-flow {
+    display: flex;
+    gap: 1.5rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 4rem;
+  }
+  .process-step {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 2rem 1.5rem;
+    width: 280px;
+    text-align: center;
+    position: relative;
+    transition: all 0.3s ease;
+  }
+  .process-step:hover {
+    border-color: var(--gold-dim);
+    box-shadow: 0 0 30px var(--gold-glow);
+    transform: translateY(-4px);
+  }
+  .process-step .step-num {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    border: 1px solid var(--gold);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 1rem;
+    color: var(--gold);
+    font-size: 1.1rem;
+    font-weight: 300;
+  }
+  .process-step h3 {
+    color: var(--text);
+    font-weight: 400;
+    font-size: 1.1rem;
+    margin-bottom: 0.8rem;
+  }
+  .process-step p {
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    line-height: 1.6;
+  }
+  .process-arrow {
+    display: flex;
+    align-items: center;
+    color: var(--gold-dim);
+    font-size: 1.5rem;
+  }
+  @media (max-width: 900px) {
+    .process-arrow { display: none; }
+    .process-step { width: 100%; }
+  }
+
+  /* Classifier */
+  .classifier {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 3rem;
+    margin-bottom: 4rem;
+  }
+  .classifier-input-wrap {
+    position: relative;
+    margin-bottom: 2rem;
+  }
+  .classifier-input {
+    width: 100%;
+    padding: 1rem 1.2rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.3s;
+  }
+  .classifier-input:focus {
+    border-color: var(--gold-dim);
+  }
+  .classifier-input::placeholder {
+    color: var(--text-dim);
+    opacity: 0.6;
+  }
+
+  /* Category Grid */
+  .cat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+  }
+  .cat-card {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.2rem 1.5rem;
+    cursor: pointer;
+    transition: all 0.35s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .cat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px; height: 100%;
+    background: var(--gold);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .cat-card:hover, .cat-card.active {
+    border-color: var(--gold-dim);
+    background: rgba(200,160,74,0.04);
+  }
+  .cat-card:hover::before, .cat-card.active::before {
+    opacity: 1;
+  }
+  .cat-card.matched {
+    border-color: var(--gold);
+    background: rgba(200,160,74,0.08);
+    box-shadow: 0 0 20px var(--gold-glow);
+  }
+  .cat-card.matched::before { opacity: 1; }
+  .cat-card h4 {
+    color: var(--gold);
+    font-weight: 400;
+    font-size: 0.95rem;
+    margin-bottom: 0.4rem;
+  }
+  .cat-card .keywords {
+    color: var(--text-dim);
+    font-size: 0.78rem;
+    margin-bottom: 0.5rem;
+  }
+  .cat-card .frameworks {
+    font-size: 0.82rem;
+    color: var(--text);
+  }
+  .cat-card .frameworks span {
+    display: inline-block;
+    background: rgba(200,160,74,0.1);
+    border: 1px solid rgba(200,160,74,0.2);
+    border-radius: 4px;
+    padding: 0.15rem 0.5rem;
+    margin: 0.15rem 0.2rem 0.15rem 0;
+    font-size: 0.75rem;
+  }
+
+  /* Frameworks */
+  .fw-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 1.2rem;
+  }
+  .fw-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+  .fw-card:hover {
+    border-color: var(--gold-dim);
+  }
+  .fw-header {
+    padding: 1.2rem 1.5rem;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .fw-header h4 {
+    font-weight: 400;
+    font-size: 1rem;
+    color: var(--text);
+  }
+  .fw-header .fw-tag {
+    font-size: 0.72rem;
+    color: var(--gold);
+    background: rgba(200,160,74,0.1);
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    white-space: nowrap;
+    margin-left: 0.5rem;
+  }
+  .fw-header .toggle {
+    color: var(--gold-dim);
+    font-size: 1.2rem;
+    transition: transform 0.3s;
+    flex-shrink: 0;
+    margin-left: 1rem;
+  }
+  .fw-card.open .fw-header .toggle {
+    transform: rotate(45deg);
+  }
+  .fw-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease;
+  }
+  .fw-card.open .fw-body {
+    max-height: 2000px;
+  }
+  .fw-content {
+    padding: 0 1.5rem 1.5rem;
+    font-size: 0.88rem;
+    color: var(--text-dim);
+    line-height: 1.8;
+  }
+  .fw-content strong {
+    color: var(--text);
+    font-weight: 500;
+  }
+  .fw-content .essence {
+    color: var(--gold);
+    font-size: 0.95rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.8rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .fw-content ul {
+    list-style: none;
+    padding-left: 0;
+  }
+  .fw-content ul li {
+    position: relative;
+    padding-left: 1.2rem;
+    margin-bottom: 0.3rem;
+  }
+  .fw-content ul li::before {
+    content: '›';
+    position: absolute;
+    left: 0;
+    color: var(--gold-dim);
+  }
+  .fw-content .tree {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 0.82rem;
+    background: var(--bg);
+    padding: 1rem;
+    border-radius: 8px;
+    margin: 0.8rem 0;
+    line-height: 1.6;
+    overflow-x: auto;
+    white-space: pre;
+    color: var(--text-dim);
+  }
+  .fw-content .tree .hl {
+    color: var(--gold);
+  }
+
+  /* Principles */
+  .principles {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+  .principle {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.5rem;
+    transition: all 0.3s;
+  }
+  .principle:hover {
+    border-color: var(--gold-dim);
+    box-shadow: 0 0 20px var(--gold-glow);
+  }
+  .principle .num {
+    color: var(--gold);
+    font-size: 2rem;
+    font-weight: 200;
+    line-height: 1;
+    margin-bottom: 0.5rem;
+  }
+  .principle h4 {
+    font-weight: 400;
+    color: var(--text);
+    margin-bottom: 0.4rem;
+    font-size: 0.95rem;
+  }
+  .principle p {
+    color: var(--text-dim);
+    font-size: 0.82rem;
+    line-height: 1.6;
+  }
+
+  /* Decision Tree */
+  .decision-tree {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 3rem;
+    margin-top: 2rem;
+  }
+  .dt-node {
+    margin-left: 1.5rem;
+    padding: 0.6rem 0;
+    position: relative;
+  }
+  .dt-node::before {
+    content: '';
+    position: absolute;
+    left: -1rem;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: var(--border);
+  }
+  .dt-node:last-child::before {
+    bottom: 50%;
+  }
+  .dt-root {
+    margin-left: 0;
+    padding: 0;
+  }
+  .dt-root::before { display: none; }
+  .dt-q {
+    color: var(--text);
+    font-size: 0.95rem;
+    cursor: pointer;
+    padding: 0.4rem 0.8rem;
+    border-radius: 6px;
+    display: inline-block;
+    transition: all 0.2s;
+  }
+  .dt-q:hover {
+    background: rgba(200,160,74,0.08);
+  }
+  .dt-q::before {
+    content: '';
+    display: inline-block;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    border: 1px solid var(--gold-dim);
+    margin-right: 0.6rem;
+    vertical-align: middle;
+  }
+  .dt-leaf {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+  }
+  .dt-leaf .problem {
+    color: var(--text-dim);
+  }
+  .dt-leaf .arrow {
+    color: var(--gold-dim);
+  }
+  .dt-leaf .result {
+    color: var(--gold);
+    background: rgba(200,160,74,0.08);
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+  }
+  .dt-children {
+    overflow: hidden;
+    transition: max-height 0.4s ease, opacity 0.3s;
+  }
+
+  /* Output Templates */
+  .template-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+  }
+  .tab-btn {
+    padding: 0.5rem 1.2rem;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-dim);
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.3s;
+  }
+  .tab-btn:hover, .tab-btn.active {
+    border-color: var(--gold);
+    color: var(--gold);
+    background: rgba(200,160,74,0.06);
+  }
+  .template-content {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 2rem;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 0.85rem;
+    line-height: 1.8;
+    white-space: pre-wrap;
+    color: var(--text-dim);
+    min-height: 200px;
+  }
+  .template-content .hl { color: var(--gold); }
+  .template-content .cm { color: var(--text-dim); opacity: 0.5; }
+
+  /* Footer */
+  footer {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: var(--text-dim);
+    font-size: 0.78rem;
+    letter-spacing: 0.1em;
+    border-top: 1px solid var(--border);
+    margin-top: 4rem;
+  }
+
+  /* Animations */
+  .fade-in {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  .fade-in.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Nav */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    background: rgba(10,10,15,0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0.8rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transform: translateY(-100%);
+    transition: transform 0.3s ease;
+  }
+  nav.show { transform: translateY(0); }
+  nav .logo {
+    color: var(--gold);
+    font-size: 0.9rem;
+    font-weight: 300;
+    letter-spacing: 0.1em;
+  }
+  nav .links {
+    display: flex;
+    gap: 1.5rem;
+  }
+  nav .links a {
+    color: var(--text-dim);
+    text-decoration: none;
+    font-size: 0.8rem;
+    letter-spacing: 0.05em;
+    transition: color 0.2s;
+  }
+  nav .links a:hover { color: var(--gold); }
+</style>
+</head>
+<body>
+
+<nav id="nav">
+  <span class="logo">McKinsey 方法论</span>
+  <div class="links">
+    <a href="#process">流程</a>
+    <a href="#classify">分类引擎</a>
+    <a href="#frameworks">12框架</a>
+    <a href="#principles">六大铁律</a>
+    <a href="#tree">决策树</a>
+    <a href="#output">输出模板</a>
+  </div>
+</nav>
+
+<!-- Hero -->
+<div class="hero">
+  <h1>McKinsey</h1>
+  <div class="subtitle">结构化思维 · 方法论引擎</div>
+  <div style="display:flex; gap:2rem; flex-wrap:wrap; justify-content:center; margin-top:1rem;">
+    <div style="text-align:center;">
+      <div style="font-size:2.5rem; font-weight:200; color:var(--gold);">12</div>
+      <div style="font-size:0.78rem; color:var(--text-dim); letter-spacing:0.1em;">FRAMEWORKS</div>
+    </div>
+    <div style="text-align:center;">
+      <div style="font-size:2.5rem; font-weight:200; color:var(--gold);">7</div>
+      <div style="font-size:0.78rem; color:var(--text-dim); letter-spacing:0.1em;">CATEGORIES</div>
+    </div>
+    <div style="text-align:center;">
+      <div style="font-size:2.5rem; font-weight:200; color:var(--gold);">6</div>
+      <div style="font-size:0.78rem; color:var(--text-dim); letter-spacing:0.1em;">PRINCIPLES</div>
+    </div>
+  </div>
+  <div class="scroll-hint" onclick="document.getElementById('process').scrollIntoView({behavior:'smooth'})">↓ 探索方法论</div>
+</div>
+
+<!-- Process -->
+<section id="process">
+  <h2 class="section-title fade-in">核心流程</h2>
+  <p class="section-subtitle fade-in">三步完成从问题到方案的结构化跃迁</p>
+  <div class="process-flow fade-in">
+    <div class="process-step">
+      <div class="step-num">1</div>
+      <h3>问题分类</h3>
+      <p>识别问题类型，自动匹配关键词信号，归入7大类别之一或多个</p>
+    </div>
+    <div class="process-arrow">→</div>
+    <div class="process-step">
+      <div class="step-num">2</div>
+      <h3>框架匹配</h3>
+      <p>选择最适合的2-3个框架组合，声明为何选择，针对具体问题而非泛泛理论</p>
+    </div>
+    <div class="process-arrow">→</div>
+    <div class="process-step">
+      <div class="step-num">3</div>
+      <h3>结构化输出</h3>
+      <p>按问题类别适配输出格式——诊断树、决策矩阵、金字塔结构、行动计划</p>
+    </div>
+  </div>
+</section>
+
+<!-- Classifier -->
+<section id="classify">
+  <h2 class="section-title fade-in">问题分类引擎</h2>
+  <p class="section-subtitle fade-in">输入你的问题描述，自动高亮匹配的分析类别</p>
+  <div class="classifier fade-in">
+    <div class="classifier-input-wrap">
+      <input class="classifier-input" id="classifierInput" placeholder="试试输入：利润为什么下降了？/ 该选A还是B？/ 怎么跟老板汇报？" />
+    </div>
+    <div class="cat-grid" id="catGrid"></div>
+  </div>
+</section>
+
+<!-- Frameworks -->
+<section id="frameworks">
+  <h2 class="section-title fade-in">12 个核心框架</h2>
+  <p class="section-subtitle fade-in">点击展开查看详细方法论</p>
+  <div class="fw-grid fade-in" id="fwGrid"></div>
+</section>
+
+<!-- Principles -->
+<section id="principles">
+  <h2 class="section-title fade-in">六大铁律</h2>
+  <p class="section-subtitle fade-in">贯穿所有分析的 McKinsey 标准</p>
+  <div class="principles fade-in" id="principlesGrid"></div>
+</section>
+
+<!-- Decision Tree -->
+<section id="tree">
+  <h2 class="section-title fade-in">框架选择决策树</h2>
+  <p class="section-subtitle fade-in">根据问题类型，快速定位最佳框架组合</p>
+  <div class="decision-tree fade-in" id="decisionTree"></div>
+</section>
+
+<!-- Output Templates -->
+<section id="output">
+  <h2 class="section-title fade-in">输出模板</h2>
+  <p class="section-subtitle fade-in">四种标准化输出格式，适配不同场景</p>
+  <div class="fade-in">
+    <div class="template-tabs" id="templateTabs"></div>
+    <div class="template-content" id="templateContent"></div>
+  </div>
+</section>
+
+<footer>
+  McKinsey 方法论引擎 · 结构化思维工具 · Powered by Claude Code
+</footer>
+
+<script>
+const categories = [
+  { name: '诊断分析', en: 'Diagnose / Analyze', keywords: ['为什么','根因','分析','诊断','原因','why','问题','下降','故障','bug'], frameworks: ['问题树', '假设驱动', '80/20'] },
+  { name: '决策排序', en: 'Decide / Prioritize', keywords: ['选择','优先级','排序','取舍','该不该','选','还是','对比','哪个'], frameworks: ['2x2矩阵', '80/20', '三层面增长'] },
+  { name: '结构表达', en: 'Structure / Express', keywords: ['汇报','报告','说清楚','表达','呈现','写','沟通','PPT','presentation'], frameworks: ['金字塔原理', 'SCR', 'MECE'] },
+  { name: '规划行动', en: 'Plan / Act', keywords: ['怎么做','方案','策略','路线图','行动','计划','实现','路线','规划'], frameworks: ['问题树(How)', '价值链', '三层面增长'] },
+  { name: '财务分析', en: 'Financial', keywords: ['利润','收入','成本','增长','降本','钱','预算','ROI','财务','营收'], frameworks: ['利润树', '80/20', '价值链'] },
+  { name: '组织诊断', en: 'Organizational', keywords: ['组织','团队','文化','架构','变革','人','管理','领导','协作'], frameworks: ['7S模型', '问题树', '假设驱动'] },
+  { name: '竞争市场', en: 'Competitive / Market', keywords: ['行业','竞争','市场','壁垒','趋势','对手','份额','客户','赛道'], frameworks: ['波特五力', 'PESTEL', '价值链'] }
+];
+
+const frameworks = [
+  { id:'mece', name:'MECE', tag:'分类基础', essence:'分类的黄金法则 — 不重叠、不遗漏',
+    body:`<strong>操作步骤：</strong>
+<ul>
+<li>明确分类对象和分类目的</li>
+<li>选择切分维度（同一层级只用一个维度）</li>
+<li>检验 ME：任意两个子类是否有交集？有则合并或重新切分</li>
+<li>检验 CE：是否存在对象无法归入任何子类？有则补充</li>
+<li>对每个子类递归执行</li>
+</ul>
+<strong>常见切分模板：</strong>
+<ul>
+<li>内部 vs 外部</li>
+<li>供给侧 vs 需求侧</li>
+<li>短期 vs 中期 vs 长期</li>
+<li>产品 vs 渠道 vs 客户</li>
+<li>增量 vs 存量</li>
+<li>可控 vs 不可控</li>
+</ul>` },
+  { id:'pyramid', name:'金字塔原理', tag:'结论先行', essence:'结论先行，论据分层，每层 MECE',
+    body:`<div class="tree">        <span class="hl">[核心结论]</span>
+       /    |     \\
+   <span class="hl">[论点1]</span> <span class="hl">[论点2]</span> <span class="hl">[论点3]</span>    ← 同层MECE
+   /  \\    /  \\    /  \\
+ 证据  证据 证据 证据 证据 证据  ← 事实支撑</div>
+<strong>两种构建路径：</strong>
+<ul>
+<li><strong>自上而下</strong>：先有假设结论 → 拆解验证子论点 → 寻找证据</li>
+<li><strong>自下而上</strong>：先收集事实 → 归纳分组 → 提炼结论</li>
+</ul>
+<strong>SCQ 开场：</strong>
+<ul>
+<li><strong>S</strong>ituation — 大家已知的背景</li>
+<li><strong>C</strong>omplication — 打破现状的变化</li>
+<li><strong>Q</strong>uestion — 由此引出的核心问题</li>
+</ul>` },
+  { id:'issue-tree', name:'问题树 / 逻辑树', tag:'递归拆解', essence:'把一个大问题递归拆解为可独立回答的子问题',
+    body:`<strong>构建步骤：</strong>
+<ul>
+<li>用一句话定义核心问题（必须是可回答的问题）</li>
+<li>第一层拆解：2-4个子问题，MECE覆盖全部答案空间</li>
+<li>逐层往下拆，直到叶子节点可通过单一分析回答</li>
+<li>标注每个叶子节点的验证方法</li>
+</ul>
+<strong>两种类型：</strong>
+<ul>
+<li><strong>诊断树 (Why)</strong>：利润为什么下降？→ 收入降了？成本升了？</li>
+<li><strong>方案树 (How)</strong>：如何提升利润？→ 提价？增量？降本？</li>
+</ul>` },
+  { id:'hypothesis', name:'假设驱动', tag:'Day 1 Answer', essence:'先形成假设，再用最小成本验证',
+    body:`<strong>流程：</strong>
+<ul>
+<li><strong>Day 1 Answer</strong>：基于现有信息给出初始假设</li>
+<li><strong>关键议题</strong>：如果假设成立，哪些条件必须为真？</li>
+<li><strong>优先级排序</strong>：最不确定 / 一旦不成立则假设崩塌的条件先验证</li>
+<li><strong>快速验证</strong>：用最小工作量验证</li>
+<li><strong>迭代</strong>：验证结果修正假设，循环</li>
+</ul>
+<strong>与问题树配合：</strong> 问题树提供结构，假设驱动决定优先级。在每个叶子节点上形成假设，按影响力和不确定性排序。` },
+  { id:'pareto', name:'80/20 法则', tag:'关键少数', essence:'识别少数关键因素，集中资源',
+    body:`<strong>应用方法：</strong>
+<ul>
+<li>列出所有因素/任务/原因</li>
+<li>量化每个因素的影响</li>
+<li>排序，找到贡献80%影响的那20%</li>
+<li>优先处理这20%</li>
+</ul>
+<strong>典型场景：</strong>
+<ul>
+<li>客户分析：哪20%客户贡献80%收入？</li>
+<li>Bug修复：哪20%代码路径产生80%错误？</li>
+<li>时间管理：哪20%工作产出80%价值？</li>
+</ul>` },
+  { id:'7s', name:'7S 模型', tag:'组织对齐', essence:'组织分析七维度，强调要素之间的对齐',
+    body:`<strong>硬件（可直接改变）：</strong>
+<ul>
+<li><strong>Strategy</strong> 战略：竞争方向和资源配置</li>
+<li><strong>Structure</strong> 结构：组织架构、汇报关系</li>
+<li><strong>Systems</strong> 制度：流程、IT系统、KPI体系</li>
+</ul>
+<strong>软件（需文化渗透）：</strong>
+<ul>
+<li><strong>Shared Values</strong> 共同价值观（核心）</li>
+<li><strong>Style</strong> 管理风格</li>
+<li><strong>Staff</strong> 人才画像</li>
+<li><strong>Skills</strong> 核心能力</li>
+</ul>
+<strong>使用：</strong> 逐一评估 → 画对齐矩阵 → 找不对齐的点 = 问题根源` },
+  { id:'horizons', name:'三层面增长', tag:'时间组合', essence:'按时间维度管理增长的投资组合',
+    body:`<strong>三个层面：</strong>
+<ul>
+<li><strong>H1 核心业务</strong>（0-1年）：保卫并扩展，指标=利润/市场份额</li>
+<li><strong>H2 新兴业务</strong>（1-3年）：建立增长引擎，指标=收入增速/用户数</li>
+<li><strong>H3 未来种子</strong>（3-5年）：探索实验，指标=学习速度/期权价值</li>
+</ul>
+<strong>典型错误：</strong> 100%资源投入H1。每个层面都需要管理关注和预算。` },
+  { id:'value-chain', name:'价值链分析', tag:'效率瓶颈', essence:'沿价值创造链条找出高价值环节和瓶颈',
+    body:`<div class="tree"><span class="hl">[输入]</span> → <span class="hl">[生产/开发]</span> → <span class="hl">[分销/交付]</span> → <span class="hl">[营销/销售]</span> → <span class="hl">[服务/售后]</span></div>
+<strong>分析步骤：</strong>
+<ul>
+<li>画出完整价值链</li>
+<li>标注每个环节的成本和价值贡献</li>
+<li>价值 &gt; 成本 = 竞争优势</li>
+<li>成本 &gt; 价值 = 优化或外包机会</li>
+</ul>` },
+  { id:'matrix', name:'2x2 矩阵', tag:'优先级判断', essence:'用两个关键维度将选项分为四类',
+    body:`<strong>经典矩阵：</strong>
+<ul>
+<li>紧急-重要矩阵：时间管理</li>
+<li>影响-难度矩阵：项目优先级</li>
+<li>吸引力-能力矩阵：市场选择</li>
+<li>确定性-影响力矩阵：假设排序</li>
+</ul>
+<strong>构建：</strong>
+<ul>
+<li>选两个最关键、最具区分力的维度</li>
+<li>确定 High/Low 标准</li>
+<li>将选项放入矩阵</li>
+<li>每个象限给出明确行动建议</li>
+</ul>` },
+  { id:'scr', name:'SCR 叙事框架', tag:'结构化表达', essence:'情境-冲突-解决，用于汇报和建议',
+    body:`<strong>结构：</strong>
+<ul>
+<li><strong>S</strong>ituation — 当前状态，受众已知的事实</li>
+<li><strong>C</strong>omplication — 为什么现状不可持续 / 出了什么问题</li>
+<li><strong>R</strong>esolution — 推荐的解决方案</li>
+</ul>
+<strong>与金字塔原理的关系：</strong> SCR 是金字塔顶部的"引入"，Resolution 就是核心结论。` },
+  { id:'profit-tree', name:'利润树', tag:'财务拆解', essence:'将财务结果分解为可操作的驱动因素',
+    body:`<div class="tree"><span class="hl">利润</span>
+├── <span class="hl">收入</span>
+│   ├── 销量
+│   │   ├── 新客户数
+│   │   └── 老客户复购率
+│   └── 单价
+│       ├── 产品定价
+│       └── 折扣率
+└── <span class="hl">成本</span>
+    ├── 固定成本
+    │   ├── 租金
+    │   ├── 人力
+    │   └── 折旧
+    └── 可变成本
+        ├── 原材料
+        ├── 物流
+        └── 佣金</div>` },
+  { id:'external', name:'PESTEL + 五力', tag:'外部环境', essence:'行业竞争与宏观环境分析',
+    body:`<strong>PESTEL：</strong>
+<ul>
+<li><strong>P</strong>olitical — 政策、法规、政治稳定性</li>
+<li><strong>E</strong>conomic — GDP、利率、汇率、通胀</li>
+<li><strong>S</strong>ocial — 人口结构、消费习惯</li>
+<li><strong>T</strong>echnological — 新技术、研发、技术壁垒</li>
+<li><strong>E</strong>nvironmental — 环保法规、气候风险</li>
+<li><strong>L</strong>egal — 知识产权、劳动法、反垄断</li>
+</ul>
+<strong>Porter 五力：</strong>
+<ul>
+<li>现有竞争者的竞争强度</li>
+<li>新进入者的威胁</li>
+<li>替代品的威胁</li>
+<li>供应商的议价能力</li>
+<li>买方的议价能力</li>
+</ul>` }
+];
+
+const principles = [
+  { num:'01', name:'MECE', desc:'所有拆解必须不重叠、不遗漏 — 这是一切分析的地基' },
+  { num:'02', name:'So-What 检验', desc:'每个分析要点必须回答"所以呢？"— 给出具体含义和行动' },
+  { num:'03', name:'假设先行', desc:'先有观点再验证，而非漫无目的地收集数据' },
+  { num:'04', name:'80/20 聚焦', desc:'识别并集中精力在贡献最大价值的关键少数' },
+  { num:'05', name:'一页纸法则', desc:'任何结论都应能在一页纸内表达清楚；做不到说明思考不够锋利' },
+  { num:'06', name:'事实为基', desc:'断言必须有数据支撑，否则明确标注为假设' }
+];
+
+const outputTemplates = {
+  '诊断分析': `<span class="hl">[核心问题]</span>
+├── 子问题 1 → <span class="hl">假设</span> → 需要的证据
+├── 子问题 2 → <span class="hl">假设</span> → 需要的证据
+└── 子问题 3 → <span class="hl">假设</span> → 需要的证据
+
+<span class="hl">Priority:</span> 不确定性最高的议题优先
+<span class="hl">Next step:</span> [具体行动]`,
+  '决策排序': `<span class="hl">Criteria:</span> [维度 A] × [维度 B]
+
+┌──────────┬───────┬───────┬──────────┬────────┐
+│  Option  │ Dim A │ Dim B │ Quadrant │ Action │
+├──────────┼───────┼───────┼──────────┼────────┤
+│ 选项 1   │  H    │  H    │ 明星     │ 全力投入│
+│ 选项 2   │  H    │  L    │ 问题     │ 选择性  │
+│ 选项 3   │  L    │  H    │ 金牛     │ 收割    │
+│ 选项 4   │  L    │  L    │ 瘦狗     │ 放弃    │
+└──────────┴───────┴───────┴──────────┴────────┘
+
+<span class="hl">Recommendation:</span> [最优选项 + 理由]`,
+  '结构表达': `<span class="cm">// SCR 开场</span>
+<span class="hl">S:</span> [情境 — 一句话背景]
+<span class="hl">C:</span> [冲突 — 一句话问题]
+<span class="hl">R:</span> [解决 — 核心结论]
+
+<span class="cm">// 金字塔主体</span>
+<span class="hl">核心结论:</span> ...
+├── 支撑论点 1（证据）
+├── 支撑论点 2（证据）
+└── 支撑论点 3（证据）`,
+  '规划行动': `<span class="hl">Goal:</span> [一句话目标]
+<span class="hl">Strategy:</span> [选定路径]
+
+<span class="hl">Phase 1</span> (短期):
+  └── [具体行动 1, 2, 3]
+
+<span class="hl">Phase 2</span> (中期):
+  └── [具体行动 4, 5, 6]
+
+<span class="hl">Phase 3</span> (长期):
+  └── [具体行动 7, 8, 9]
+
+<span class="hl">Key Risks:</span> [风险 1] [风险 2]
+<span class="hl">KPIs:</span> [可量化指标]`
+};
+
+const decisionTreeData = [
+  { q: '需要分析/诊断问题？', children: [
+    { leaf: '财务问题', result: '利润树' },
+    { leaf: '组织问题', result: '7S模型' },
+    { leaf: '行业/竞争', result: '波特五力 + PESTEL' },
+    { leaf: '流程/效率', result: '价值链分析' },
+    { leaf: '通用复杂问题', result: '问题树 + 假设驱动' }
+  ]},
+  { q: '需要做决策/排优先级？', children: [
+    { leaf: '多选项选择', result: '2x2矩阵' },
+    { leaf: '资源分配', result: '80/20 + 三层面增长' },
+    { leaf: '战略方向', result: '三层面增长 + PESTEL' }
+  ]},
+  { q: '需要结构化表达/汇报？', children: [
+    { leaf: '书面报告', result: '金字塔原理 + SCR' },
+    { leaf: '口头汇报', result: 'SCR + 金字塔' },
+    { leaf: '分析拆解', result: 'MECE + 问题树' }
+  ]},
+  { q: '需要解决方案/行动计划？', children: [
+    { leaf: '增长策略', result: '三层面 + 价值链' },
+    { leaf: '降本增效', result: '利润树 + 80/20 + 价值链' },
+    { leaf: '组织变革', result: '7S + 假设驱动' }
+  ]}
+];
+
+// Render categories
+const catGrid = document.getElementById('catGrid');
+categories.forEach((cat, i) => {
+  const div = document.createElement('div');
+  div.className = 'cat-card';
+  div.dataset.index = i;
+  div.innerHTML = `
+    <h4>${cat.name} <span style="opacity:0.5;font-weight:300;font-size:0.8rem">${cat.en}</span></h4>
+    <div class="keywords">关键词: ${cat.keywords.join(' · ')}</div>
+    <div class="frameworks">${cat.frameworks.map(f => `<span>${f}</span>`).join('')}</div>
+  `;
+  catGrid.appendChild(div);
+});
+
+// Classifier
+const input = document.getElementById('classifierInput');
+input.addEventListener('input', () => {
+  const val = input.value.toLowerCase();
+  document.querySelectorAll('.cat-card').forEach((card, i) => {
+    const cat = categories[i];
+    const matched = val.length > 0 && cat.keywords.some(k => val.includes(k.toLowerCase()));
+    card.classList.toggle('matched', matched);
+  });
+});
+
+// Render frameworks
+const fwGrid = document.getElementById('fwGrid');
+frameworks.forEach(fw => {
+  const div = document.createElement('div');
+  div.className = 'fw-card';
+  div.innerHTML = `
+    <div class="fw-header">
+      <div style="display:flex;align-items:center;flex-wrap:wrap;gap:0.5rem;">
+        <h4>${fw.name}</h4>
+        <span class="fw-tag">${fw.tag}</span>
+      </div>
+      <span class="toggle">+</span>
+    </div>
+    <div class="fw-body">
+      <div class="fw-content">
+        <div class="essence">${fw.essence}</div>
+        ${fw.body}
+      </div>
+    </div>
+  `;
+  div.querySelector('.fw-header').addEventListener('click', () => div.classList.toggle('open'));
+  fwGrid.appendChild(div);
+});
+
+// Render principles
+const pGrid = document.getElementById('principlesGrid');
+principles.forEach(p => {
+  const div = document.createElement('div');
+  div.className = 'principle';
+  div.innerHTML = `<div class="num">${p.num}</div><h4>${p.name}</h4><p>${p.desc}</p>`;
+  pGrid.appendChild(div);
+});
+
+// Render decision tree
+const dtEl = document.getElementById('decisionTree');
+decisionTreeData.forEach(branch => {
+  const bDiv = document.createElement('div');
+  bDiv.className = 'dt-node dt-root';
+  const qEl = document.createElement('div');
+  qEl.className = 'dt-q';
+  qEl.textContent = branch.q;
+  bDiv.appendChild(qEl);
+  const childWrap = document.createElement('div');
+  childWrap.className = 'dt-children';
+  childWrap.style.maxHeight = '0';
+  childWrap.style.opacity = '0';
+  branch.children.forEach(c => {
+    const leaf = document.createElement('div');
+    leaf.className = 'dt-node';
+    leaf.innerHTML = `<div class="dt-leaf"><span class="problem">${c.leaf}</span><span class="arrow">→</span><span class="result">${c.result}</span></div>`;
+    childWrap.appendChild(leaf);
+  });
+  bDiv.appendChild(childWrap);
+  qEl.addEventListener('click', () => {
+    const open = childWrap.style.maxHeight !== '0px';
+    childWrap.style.maxHeight = open ? '0' : '500px';
+    childWrap.style.opacity = open ? '0' : '1';
+  });
+  dtEl.appendChild(bDiv);
+});
+
+// Output templates
+const tabs = document.getElementById('templateTabs');
+const content = document.getElementById('templateContent');
+let activeTab = Object.keys(outputTemplates)[0];
+function renderTabs() {
+  tabs.innerHTML = '';
+  Object.keys(outputTemplates).forEach(k => {
+    const btn = document.createElement('div');
+    btn.className = 'tab-btn' + (k === activeTab ? ' active' : '');
+    btn.textContent = k;
+    btn.addEventListener('click', () => { activeTab = k; renderTabs(); });
+    tabs.appendChild(btn);
+  });
+  content.innerHTML = outputTemplates[activeTab];
+}
+renderTabs();
+
+// Nav
+const nav = document.getElementById('nav');
+window.addEventListener('scroll', () => {
+  nav.classList.toggle('show', window.scrollY > window.innerHeight * 0.5);
+});
+
+// Fade-in
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.1 });
+document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>

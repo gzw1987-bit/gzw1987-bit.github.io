@@ -1,0 +1,2208 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>控制论 · Cybernetics Interactive</title>
+<style>
+:root {
+  --bronze: #d4a574;
+  --gold: #f0c080;
+  --cream: #e8d5b7;
+  --bg: #0f0f23;
+  --bg2: #1a1a2e;
+  --bg3: #16162b;
+  --border: #2a2a3d;
+  --text: #e0d6c8;
+  --text2: #8a7f6f;
+  --red: #e85d5d;
+  --blue: #5d9be8;
+  --green: #5de8a0;
+  --yellow: #e8d45d;
+  --cyan: #00f0ff;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Noto Serif SC', 'PingFang SC', serif;
+  line-height: 1.8;
+  overflow-x: hidden;
+}
+
+::selection {
+  background: rgba(212,165,116,0.3);
+  color: var(--gold);
+}
+
+/* ===== NAVIGATION ===== */
+.nav-dots {
+  position: fixed;
+  right: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.nav-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1.5px solid var(--bronze);
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.3s;
+  position: relative;
+}
+
+.nav-dot:hover, .nav-dot.active {
+  background: var(--bronze);
+  box-shadow: 0 0 12px rgba(212,165,116,0.4);
+}
+
+.nav-dot .tooltip {
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+  color: var(--cream);
+}
+
+.nav-dot:hover .tooltip { opacity: 1; }
+
+/* ===== SECTIONS ===== */
+section {
+  min-height: 100vh;
+  padding: 80px 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.container {
+  max-width: 960px;
+  width: 100%;
+}
+
+/* ===== HERO ===== */
+#hero {
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+#hero::before {
+  content: '';
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  border-radius: 50%;
+  border: 1px solid rgba(212,165,116,0.08);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%,-50%);
+  animation: pulse-ring 6s ease-in-out infinite;
+}
+
+#hero::after {
+  content: '';
+  position: absolute;
+  width: 400px;
+  height: 400px;
+  border-radius: 50%;
+  border: 1px solid rgba(212,165,116,0.12);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%,-50%);
+  animation: pulse-ring 6s ease-in-out infinite 1s;
+}
+
+@keyframes pulse-ring {
+  0%, 100% { transform: translate(-50%,-50%) scale(1); opacity: 0.3; }
+  50% { transform: translate(-50%,-50%) scale(1.15); opacity: 0.8; }
+}
+
+.hero-title {
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  font-weight: 900;
+  letter-spacing: 6px;
+  background: linear-gradient(135deg, var(--bronze), var(--gold), var(--cream));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  position: relative;
+  z-index: 1;
+}
+
+.hero-sub {
+  font-size: clamp(1rem, 2vw, 1.3rem);
+  color: var(--text2);
+  margin-top: 16px;
+  letter-spacing: 4px;
+  position: relative;
+  z-index: 1;
+}
+
+.hero-tagline {
+  font-size: 0.95rem;
+  color: var(--bronze);
+  margin-top: 40px;
+  font-style: italic;
+  opacity: 0.8;
+  position: relative;
+  z-index: 1;
+}
+
+/* ===== FEEDBACK LOOP CANVAS ===== */
+#feedback-loop {
+  background: linear-gradient(180deg, var(--bg) 0%, var(--bg2) 100%);
+}
+
+.section-title {
+  font-size: clamp(1.5rem, 3vw, 2.2rem);
+  color: var(--gold);
+  text-align: center;
+  margin-bottom: 12px;
+  letter-spacing: 3px;
+}
+
+.section-desc {
+  text-align: center;
+  color: var(--text2);
+  margin-bottom: 40px;
+  font-size: 0.95rem;
+}
+
+.loop-canvas-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.loop-svg {
+  width: 100%;
+  height: auto;
+}
+
+.loop-controls {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 24px;
+  flex-wrap: wrap;
+}
+
+.btn {
+  padding: 10px 24px;
+  border: 1px solid var(--bronze);
+  background: transparent;
+  color: var(--bronze);
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.9rem;
+  transition: all 0.3s;
+  letter-spacing: 1px;
+}
+
+.btn:hover {
+  background: rgba(212,165,116,0.15);
+  box-shadow: 0 0 20px rgba(212,165,116,0.1);
+}
+
+.btn.active {
+  background: rgba(212,165,116,0.2);
+  color: var(--gold);
+}
+
+.loop-info {
+  margin-top: 24px;
+  padding: 20px;
+  background: rgba(26,26,46,0.6);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  font-size: 0.9rem;
+  line-height: 1.8;
+  min-height: 120px;
+  transition: all 0.3s;
+}
+
+.loop-info .label {
+  color: var(--gold);
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+/* ===== VSM INTERACTIVE ===== */
+#vsm {
+  background: var(--bg);
+}
+
+.vsm-diagram {
+  position: relative;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.vsm-layer {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  margin: 8px 0;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.4s;
+  position: relative;
+  overflow: hidden;
+}
+
+.vsm-layer::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  border-radius: 12px 0 0 12px;
+}
+
+.vsm-layer[data-sys="5"]::before { background: var(--gold); }
+.vsm-layer[data-sys="4"]::before { background: var(--cyan); }
+.vsm-layer[data-sys="3"]::before { background: var(--blue); }
+.vsm-layer[data-sys="3s"]::before { background: var(--red); }
+.vsm-layer[data-sys="2"]::before { background: var(--green); }
+.vsm-layer[data-sys="1"]::before { background: var(--bronze); }
+
+.vsm-layer:hover {
+  background: rgba(212,165,116,0.05);
+  border-color: rgba(212,165,116,0.3);
+  transform: translateX(8px);
+}
+
+.vsm-layer.expanded {
+  background: rgba(212,165,116,0.08);
+  border-color: rgba(212,165,116,0.4);
+}
+
+.vsm-sys-num {
+  font-size: 1.8rem;
+  font-weight: 900;
+  min-width: 48px;
+  text-align: center;
+  opacity: 0.7;
+}
+
+.vsm-layer[data-sys="5"] .vsm-sys-num { color: var(--gold); }
+.vsm-layer[data-sys="4"] .vsm-sys-num { color: var(--cyan); }
+.vsm-layer[data-sys="3"] .vsm-sys-num { color: var(--blue); }
+.vsm-layer[data-sys="3s"] .vsm-sys-num { color: var(--red); }
+.vsm-layer[data-sys="2"] .vsm-sys-num { color: var(--green); }
+.vsm-layer[data-sys="1"] .vsm-sys-num { color: var(--bronze); }
+
+.vsm-main {
+  flex: 1;
+}
+
+.vsm-name {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--cream);
+}
+
+.vsm-role {
+  font-size: 0.85rem;
+  color: var(--text2);
+  margin-top: 2px;
+}
+
+.vsm-detail {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease, padding 0.3s;
+  font-size: 0.88rem;
+  color: var(--text);
+  line-height: 1.9;
+  padding: 0 20px;
+  margin: 0 0 0 64px;
+}
+
+.vsm-detail.open {
+  max-height: 400px;
+  padding: 16px 20px;
+}
+
+.vsm-detail ul {
+  list-style: none;
+  padding: 0;
+}
+
+.vsm-detail li {
+  padding: 4px 0;
+  padding-left: 16px;
+  position: relative;
+}
+
+.vsm-detail li::before {
+  content: '›';
+  position: absolute;
+  left: 0;
+  color: var(--bronze);
+}
+
+.vsm-channels {
+  margin-top: 24px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.vsm-channel {
+  padding: 14px 16px;
+  background: rgba(26,26,46,0.5);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.channel-arrow {
+  color: var(--bronze);
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+/* ===== ASHBY ===== */
+#ashby {
+  background: linear-gradient(180deg, var(--bg2) 0%, var(--bg) 100%);
+}
+
+.ashby-visual {
+  display: flex;
+  gap: 40px;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 32px;
+  flex-wrap: wrap;
+}
+
+.ashby-bar-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.ashby-bar-label {
+  font-size: 0.85rem;
+  color: var(--text2);
+  letter-spacing: 1px;
+}
+
+.ashby-bar-container {
+  width: 120px;
+  height: 260px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  position: relative;
+  overflow: hidden;
+  background: rgba(15,15,35,0.5);
+}
+
+.ashby-bar-fill {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  border-radius: 0 0 9px 9px;
+  transition: height 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.ashby-bar-fill.disturbance {
+  background: linear-gradient(180deg, var(--red) 0%, rgba(232,93,93,0.3) 100%);
+}
+
+.ashby-bar-fill.controller {
+  background: linear-gradient(180deg, var(--blue) 0%, rgba(93,155,232,0.3) 100%);
+}
+
+.ashby-bar-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-top: 8px;
+}
+
+.ashby-vs {
+  font-size: 2rem;
+  color: var(--text2);
+  font-weight: 300;
+}
+
+.ashby-verdict {
+  text-align: center;
+  font-size: 1.2rem;
+  padding: 16px 24px;
+  border-radius: 10px;
+  margin: 0 auto 24px;
+  max-width: 500px;
+  transition: all 0.5s;
+}
+
+.ashby-verdict.pass {
+  color: var(--green);
+  border: 1px solid rgba(93,232,160,0.3);
+  background: rgba(93,232,160,0.05);
+}
+
+.ashby-verdict.fail {
+  color: var(--red);
+  border: 1px solid rgba(232,93,93,0.3);
+  background: rgba(232,93,93,0.05);
+}
+
+.ashby-sliders {
+  display: flex;
+  gap: 40px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.slider-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.slider-group label {
+  font-size: 0.85rem;
+  color: var(--text2);
+}
+
+input[type="range"] {
+  -webkit-appearance: none;
+  width: 180px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--border);
+  outline: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--bronze);
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(212,165,116,0.3);
+}
+
+/* ===== LEVERAGE POINTS ===== */
+#leverage {
+  background: var(--bg);
+}
+
+.leverage-tower {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.lever-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s;
+  position: relative;
+}
+
+.lever-row:hover {
+  background: rgba(212,165,116,0.06);
+}
+
+.lever-row.selected {
+  background: rgba(212,165,116,0.1);
+  border: 1px solid rgba(212,165,116,0.2);
+}
+
+.lever-num {
+  font-size: 1.3rem;
+  font-weight: 900;
+  min-width: 36px;
+  text-align: center;
+  transition: color 0.3s;
+}
+
+.lever-bar {
+  height: 6px;
+  border-radius: 3px;
+  transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  flex-shrink: 0;
+}
+
+.lever-name {
+  flex: 1;
+  font-size: 0.9rem;
+  color: var(--cream);
+  min-width: 140px;
+}
+
+.lever-detail {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease;
+  font-size: 0.85rem;
+  color: var(--text2);
+  padding: 0 16px 0 52px;
+  line-height: 1.8;
+}
+
+.lever-detail.open {
+  max-height: 200px;
+  padding-bottom: 8px;
+}
+
+/* ===== CAUSAL LOOP BUILDER ===== */
+#cld-builder {
+  background: linear-gradient(180deg, var(--bg) 0%, var(--bg2) 100%);
+}
+
+.cld-workspace {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 20px;
+  max-width: 900px;
+  margin: 0 auto;
+  min-height: 480px;
+}
+
+.cld-panel {
+  background: rgba(26,26,46,0.5);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.cld-panel h3 {
+  font-size: 0.95rem;
+  color: var(--gold);
+  margin-bottom: 16px;
+  letter-spacing: 1px;
+}
+
+.cld-var-input {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.cld-var-input input {
+  flex: 1;
+  background: rgba(15,15,35,0.8);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.85rem;
+  outline: none;
+}
+
+.cld-var-input input:focus {
+  border-color: var(--bronze);
+}
+
+.cld-var-input button {
+  padding: 8px 14px;
+  background: rgba(212,165,116,0.15);
+  border: 1px solid var(--bronze);
+  color: var(--bronze);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+
+.cld-var-input button:hover {
+  background: rgba(212,165,116,0.25);
+}
+
+.cld-var-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 20px;
+  max-height: 160px;
+  overflow-y: auto;
+}
+
+.cld-var-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
+  background: rgba(15,15,35,0.5);
+  border-radius: 6px;
+  font-size: 0.85rem;
+  cursor: grab;
+}
+
+.cld-var-item .delete-var {
+  color: var(--text2);
+  cursor: pointer;
+  font-size: 0.8rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: color 0.2s;
+}
+
+.cld-var-item .delete-var:hover {
+  color: var(--red);
+}
+
+.cld-link-section h4 {
+  font-size: 0.85rem;
+  color: var(--cream);
+  margin-bottom: 10px;
+}
+
+.cld-link-row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.cld-link-row select {
+  background: rgba(15,15,35,0.8);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 8px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.82rem;
+  outline: none;
+  cursor: pointer;
+  max-width: 90px;
+}
+
+.cld-link-row select:focus {
+  border-color: var(--bronze);
+}
+
+.polarity-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text2);
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.polarity-btn.pos { color: var(--green); border-color: rgba(93,232,160,0.4); background: rgba(93,232,160,0.1); }
+.polarity-btn.neg { color: var(--red); border-color: rgba(232,93,93,0.4); background: rgba(232,93,93,0.1); }
+
+.cld-canvas-wrap {
+  position: relative;
+}
+
+.cld-canvas-wrap svg {
+  width: 100%;
+  height: 100%;
+  min-height: 440px;
+}
+
+.cld-node {
+  cursor: grab;
+  user-select: none;
+}
+
+.cld-node circle {
+  transition: r 0.2s, stroke 0.2s;
+}
+
+.cld-node:hover circle {
+  r: 32;
+  stroke: var(--gold);
+}
+
+.cld-node text {
+  fill: var(--cream);
+  font-family: 'Noto Serif SC', serif;
+  font-size: 13px;
+  text-anchor: middle;
+  dominant-baseline: central;
+  pointer-events: none;
+}
+
+.cld-edge-label {
+  font-size: 16px;
+  font-weight: 700;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+
+.cld-loop-label {
+  font-size: 14px;
+  font-weight: 700;
+  text-anchor: middle;
+  dominant-baseline: central;
+  fill: var(--gold);
+  opacity: 0.8;
+}
+
+/* ===== AGENTS ===== */
+#agents {
+  background: linear-gradient(180deg, var(--bg2) 0%, var(--bg) 100%);
+}
+
+.agents-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.agent-card {
+  padding: 28px 24px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.4s;
+  position: relative;
+  overflow: hidden;
+}
+
+.agent-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+}
+
+.agent-card.red::before { background: var(--red); }
+.agent-card.blue::before { background: var(--blue); }
+.agent-card.green::before { background: var(--green); }
+.agent-card.yellow::before { background: var(--yellow); }
+
+.agent-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
+
+.agent-card.red:hover { border-color: rgba(232,93,93,0.4); background: rgba(232,93,93,0.05); }
+.agent-card.blue:hover { border-color: rgba(93,155,232,0.4); background: rgba(93,155,232,0.05); }
+.agent-card.green:hover { border-color: rgba(93,232,160,0.4); background: rgba(93,232,160,0.05); }
+.agent-card.yellow:hover { border-color: rgba(232,212,93,0.4); background: rgba(232,212,93,0.05); }
+
+.agent-card.expanded {
+  grid-column: 1 / -1;
+}
+
+.agent-icon {
+  font-size: 2rem;
+  margin-bottom: 12px;
+}
+
+.agent-card.red .agent-icon { color: var(--red); }
+.agent-card.blue .agent-icon { color: var(--blue); }
+.agent-card.green .agent-icon { color: var(--green); }
+.agent-card.yellow .agent-icon { color: var(--yellow); }
+
+.agent-name {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--cream);
+  margin-bottom: 4px;
+}
+
+.agent-en {
+  font-size: 0.8rem;
+  color: var(--text2);
+  margin-bottom: 12px;
+}
+
+.agent-desc {
+  font-size: 0.88rem;
+  color: var(--text2);
+  line-height: 1.7;
+}
+
+.agent-frameworks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.framework-tag {
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  border: 1px solid var(--border);
+  color: var(--text2);
+}
+
+.agent-card.red .framework-tag { border-color: rgba(232,93,93,0.3); color: rgba(232,93,93,0.8); }
+.agent-card.blue .framework-tag { border-color: rgba(93,155,232,0.3); color: rgba(93,155,232,0.8); }
+.agent-card.green .framework-tag { border-color: rgba(93,232,160,0.3); color: rgba(93,232,160,0.8); }
+.agent-card.yellow .framework-tag { border-color: rgba(232,212,93,0.3); color: rgba(232,212,93,0.8); }
+
+.agent-expanded-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.5s ease;
+  margin-top: 0;
+}
+
+.agent-card.expanded .agent-expanded-content {
+  max-height: 600px;
+  margin-top: 20px;
+}
+
+.agent-process {
+  padding: 16px;
+  background: rgba(15,15,35,0.4);
+  border-radius: 10px;
+  font-size: 0.85rem;
+  line-height: 1.9;
+}
+
+.agent-process ol {
+  padding-left: 20px;
+}
+
+.agent-process li {
+  padding: 4px 0;
+}
+
+/* ===== DEMO / DIAGNOSTIC ===== */
+#diagnostic {
+  background: var(--bg);
+}
+
+.diag-flow {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.diag-question {
+  text-align: center;
+  font-size: 1.1rem;
+  color: var(--cream);
+  margin-bottom: 28px;
+  min-height: 60px;
+  transition: opacity 0.3s;
+}
+
+.diag-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.diag-option {
+  padding: 16px 20px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 0.95rem;
+}
+
+.diag-option:hover {
+  border-color: rgba(212,165,116,0.4);
+  background: rgba(212,165,116,0.06);
+  transform: translateX(6px);
+}
+
+.diag-option .opt-icon {
+  font-size: 1.3rem;
+  flex-shrink: 0;
+}
+
+.diag-option .opt-text {
+  flex: 1;
+}
+
+.diag-option .opt-hint {
+  font-size: 0.8rem;
+  color: var(--text2);
+}
+
+.diag-result {
+  padding: 28px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: rgba(26,26,46,0.5);
+  display: none;
+}
+
+.diag-result.show {
+  display: block;
+  animation: fadeUp 0.5s ease;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.diag-result h3 {
+  color: var(--gold);
+  margin-bottom: 16px;
+  font-size: 1.1rem;
+}
+
+.diag-result .result-agent {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 700;
+  margin: 12px 0;
+}
+
+.diag-result .result-frameworks {
+  margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.diag-reset {
+  margin-top: 20px;
+  text-align: center;
+}
+
+/* ===== FOOTER ===== */
+footer {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text2);
+  font-size: 0.8rem;
+  border-top: 1px solid var(--border);
+}
+
+footer a {
+  color: var(--bronze);
+  text-decoration: none;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  section { padding: 60px 20px; }
+  .agents-grid { grid-template-columns: 1fr; }
+  .cld-workspace { grid-template-columns: 1fr; }
+  .vsm-channels { grid-template-columns: 1fr; }
+  .ashby-visual { flex-direction: column; gap: 20px; }
+  .nav-dots { right: 12px; }
+}
+
+/* ===== SCROLL ANIMATIONS ===== */
+.fade-in {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.fade-in.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+</style>
+</head>
+<body>
+
+<!-- Navigation Dots -->
+<nav class="nav-dots" id="navDots">
+  <div class="nav-dot active" data-target="hero"><span class="tooltip">首页</span></div>
+  <div class="nav-dot" data-target="feedback-loop"><span class="tooltip">反馈回路</span></div>
+  <div class="nav-dot" data-target="vsm"><span class="tooltip">VSM</span></div>
+  <div class="nav-dot" data-target="ashby"><span class="tooltip">Ashby定律</span></div>
+  <div class="nav-dot" data-target="leverage"><span class="tooltip">杠杆点</span></div>
+  <div class="nav-dot" data-target="cld-builder"><span class="tooltip">回路构建</span></div>
+  <div class="nav-dot" data-target="agents"><span class="tooltip">四大Agent</span></div>
+  <div class="nav-dot" data-target="diagnostic"><span class="tooltip">诊断树</span></div>
+</nav>
+
+<!-- Hero -->
+<section id="hero">
+  <div class="container">
+    <h1 class="hero-title">控 制 论</h1>
+    <p class="hero-sub">CYBERNETICS INTERACTIVE</p>
+    <p class="hero-tagline">"Only variety can absorb variety." — W. Ross Ashby</p>
+  </div>
+</section>
+
+<!-- Feedback Loop -->
+<section id="feedback-loop">
+  <div class="container">
+    <h2 class="section-title fade-in">反馈回路</h2>
+    <p class="section-desc fade-in">系统最基本的控制单元 — 输出返回影响输入</p>
+
+    <div class="loop-canvas-wrap fade-in">
+      <svg class="loop-svg" viewBox="0 0 700 360" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arrowBronze" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#d4a574"/>
+          </marker>
+          <marker id="arrowRed" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#e85d5d"/>
+          </marker>
+          <marker id="arrowGreen" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#5de8a0"/>
+          </marker>
+          <filter id="glow">
+            <feGaussianBlur stdDeviation="3" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+
+        <!-- Negative Feedback Loop -->
+        <g id="loop-negative" class="loop-group" style="opacity:1">
+          <circle cx="180" cy="100" r="40" fill="none" stroke="#5de8a0" stroke-width="2" opacity="0.6"/>
+          <text x="180" y="95" text-anchor="middle" fill="#e0d6c8" font-size="13" font-family="Noto Serif SC">目标</text>
+          <text x="180" y="112" text-anchor="middle" fill="#8a7f6f" font-size="11" font-family="Noto Serif SC">设定点</text>
+
+          <circle cx="480" cy="100" r="40" fill="none" stroke="#5de8a0" stroke-width="2" opacity="0.6"/>
+          <text x="480" y="95" text-anchor="middle" fill="#e0d6c8" font-size="13" font-family="Noto Serif SC">实际</text>
+          <text x="480" y="112" text-anchor="middle" fill="#8a7f6f" font-size="11" font-family="Noto Serif SC">状态</text>
+
+          <circle cx="480" cy="260" r="40" fill="none" stroke="#5de8a0" stroke-width="2" opacity="0.6"/>
+          <text x="480" y="255" text-anchor="middle" fill="#e0d6c8" font-size="13" font-family="Noto Serif SC">执行</text>
+          <text x="480" y="272" text-anchor="middle" fill="#8a7f6f" font-size="11" font-family="Noto Serif SC">修正动作</text>
+
+          <circle cx="180" cy="260" r="40" fill="none" stroke="#5de8a0" stroke-width="2" opacity="0.6"/>
+          <text x="180" y="255" text-anchor="middle" fill="#e0d6c8" font-size="13" font-family="Noto Serif SC">比较</text>
+          <text x="180" y="272" text-anchor="middle" fill="#8a7f6f" font-size="11" font-family="Noto Serif SC">偏差检测</text>
+
+          <!-- Arrows -->
+          <line x1="220" y1="100" x2="435" y2="100" stroke="#5de8a0" stroke-width="1.5" marker-end="url(#arrowGreen)" opacity="0.7"/>
+          <text x="330" y="88" text-anchor="middle" fill="#5de8a0" font-size="14" font-weight="700">+</text>
+
+          <line x1="480" y1="140" x2="480" y2="215" stroke="#5de8a0" stroke-width="1.5" marker-end="url(#arrowGreen)" opacity="0.7"/>
+          <text x="498" y="180" fill="#5de8a0" font-size="14" font-weight="700">−</text>
+
+          <line x1="440" y1="260" x2="225" y2="260" stroke="#5de8a0" stroke-width="1.5" marker-end="url(#arrowGreen)" opacity="0.7"/>
+          <text x="330" y="250" text-anchor="middle" fill="#5de8a0" font-size="14" font-weight="700">+</text>
+
+          <line x1="180" y1="220" x2="180" y2="145" stroke="#5de8a0" stroke-width="1.5" marker-end="url(#arrowGreen)" opacity="0.7"/>
+          <text x="162" y="180" fill="#5de8a0" font-size="14" font-weight="700">−</text>
+
+          <!-- Center Label -->
+          <text x="330" y="175" text-anchor="middle" fill="#5de8a0" font-size="18" font-weight="900" filter="url(#glow)">B</text>
+          <text x="330" y="195" text-anchor="middle" fill="#8a7f6f" font-size="11">平衡回路</text>
+        </g>
+
+        <!-- Positive Feedback Loop -->
+        <g id="loop-positive" class="loop-group" style="opacity:0; display:none">
+          <circle cx="180" cy="100" r="40" fill="none" stroke="#e85d5d" stroke-width="2" opacity="0.6"/>
+          <text x="180" y="95" text-anchor="middle" fill="#e0d6c8" font-size="13" font-family="Noto Serif SC">用户数</text>
+          <text x="180" y="112" text-anchor="middle" fill="#8a7f6f" font-size="11" font-family="Noto Serif SC">↑增长</text>
+
+          <circle cx="480" cy="100" r="40" fill="none" stroke="#e85d5d" stroke-width="2" opacity="0.6"/>
+          <text x="480" y="95" text-anchor="middle" fill="#e0d6c8" font-size="13" font-family="Noto Serif SC">内容量</text>
+          <text x="480" y="112" text-anchor="middle" fill="#8a7f6f" font-size="11" font-family="Noto Serif SC">↑增长</text>
+
+          <circle cx="480" cy="260" r="40" fill="none" stroke="#e85d5d" stroke-width="2" opacity="0.6"/>
+          <text x="480" y="255" text-anchor="middle" fill="#e0d6c8" font-size="13" font-family="Noto Serif SC">吸引力</text>
+          <text x="480" y="272" text-anchor="middle" fill="#8a7f6f" font-size="11" font-family="Noto Serif SC">↑增长</text>
+
+          <circle cx="180" cy="260" r="40" fill="none" stroke="#e85d5d" stroke-width="2" opacity="0.6"/>
+          <text x="180" y="255" text-anchor="middle" fill="#e0d6c8" font-size="13" font-family="Noto Serif SC">口碑</text>
+          <text x="180" y="272" text-anchor="middle" fill="#8a7f6f" font-size="11" font-family="Noto Serif SC">↑传播</text>
+
+          <line x1="220" y1="100" x2="435" y2="100" stroke="#e85d5d" stroke-width="1.5" marker-end="url(#arrowRed)" opacity="0.7"/>
+          <text x="330" y="88" text-anchor="middle" fill="#e85d5d" font-size="14" font-weight="700">+</text>
+
+          <line x1="480" y1="140" x2="480" y2="215" stroke="#e85d5d" stroke-width="1.5" marker-end="url(#arrowRed)" opacity="0.7"/>
+          <text x="498" y="180" fill="#e85d5d" font-size="14" font-weight="700">+</text>
+
+          <line x1="440" y1="260" x2="225" y2="260" stroke="#e85d5d" stroke-width="1.5" marker-end="url(#arrowRed)" opacity="0.7"/>
+          <text x="330" y="250" text-anchor="middle" fill="#e85d5d" font-size="14" font-weight="700">+</text>
+
+          <line x1="180" y1="220" x2="180" y2="145" stroke="#e85d5d" stroke-width="1.5" marker-end="url(#arrowRed)" opacity="0.7"/>
+          <text x="162" y="180" fill="#e85d5d" font-size="14" font-weight="700">+</text>
+
+          <text x="330" y="175" text-anchor="middle" fill="#e85d5d" font-size="18" font-weight="900" filter="url(#glow)">R</text>
+          <text x="330" y="195" text-anchor="middle" fill="#8a7f6f" font-size="11">增强回路</text>
+        </g>
+
+        <!-- Delay example -->
+        <g id="loop-delay" class="loop-group" style="opacity:0; display:none">
+          <circle cx="140" cy="180" r="40" fill="none" stroke="#d4a574" stroke-width="2" opacity="0.6"/>
+          <text x="140" y="175" text-anchor="middle" fill="#e0d6c8" font-size="13" font-family="Noto Serif SC">订单</text>
+          <text x="140" y="192" text-anchor="middle" fill="#8a7f6f" font-size="11" font-family="Noto Serif SC">需求信号</text>
+
+          <circle cx="350" cy="100" r="40" fill="none" stroke="#d4a574" stroke-width="2" opacity="0.6"/>
+          <text x="350" y="95" text-anchor="middle" fill="#e0d6c8" font-size="13" font-family="Noto Serif SC">生产</text>
+          <text x="350" y="112" text-anchor="middle" fill="#8a7f6f" font-size="11" font-family="Noto Serif SC">产能调整</text>
+
+          <circle cx="560" cy="180" r="40" fill="none" stroke="#d4a574" stroke-width="2" opacity="0.6"/>
+          <text x="560" y="175" text-anchor="middle" fill="#e0d6c8" font-size="13" font-family="Noto Serif SC">库存</text>
+          <text x="560" y="192" text-anchor="middle" fill="#8a7f6f" font-size="11" font-family="Noto Serif SC">实际水平</text>
+
+          <circle cx="350" cy="280" r="40" fill="none" stroke="#d4a574" stroke-width="2" opacity="0.6"/>
+          <text x="350" y="275" text-anchor="middle" fill="#e0d6c8" font-size="13" font-family="Noto Serif SC">感知</text>
+          <text x="350" y="292" text-anchor="middle" fill="#8a7f6f" font-size="11" font-family="Noto Serif SC">缺货恐慌</text>
+
+          <line x1="175" y1="158" x2="315" y2="118" stroke="#d4a574" stroke-width="1.5" marker-end="url(#arrowBronze)" opacity="0.7"/>
+          <text x="240" y="128" fill="#d4a574" font-size="14" font-weight="700">+</text>
+
+          <line x1="385" y1="118" x2="525" y2="158" stroke="#d4a574" stroke-width="1.5" marker-end="url(#arrowBronze)" opacity="0.7"/>
+          <text x="460" y="128" fill="#d4a574" font-size="14" font-weight="700">+</text>
+
+          <!-- Delay marker -->
+          <line x1="540" y1="218" x2="385" y2="268" stroke="#d4a574" stroke-width="1.5" marker-end="url(#arrowBronze)" opacity="0.7" stroke-dasharray="6,4"/>
+          <text x="470" y="256" fill="#f0c080" font-size="12" font-weight="700">// 延迟3周</text>
+          <text x="468" y="238" fill="#d4a574" font-size="14" font-weight="700">−</text>
+
+          <line x1="315" y1="268" x2="175" y2="202" stroke="#d4a574" stroke-width="1.5" marker-end="url(#arrowBronze)" opacity="0.7"/>
+          <text x="240" y="248" fill="#d4a574" font-size="14" font-weight="700">+</text>
+
+          <text x="350" y="185" text-anchor="middle" fill="#f0c080" font-size="16" font-weight="900" filter="url(#glow)">B + delay</text>
+          <text x="350" y="205" text-anchor="middle" fill="#8a7f6f" font-size="11">延迟导致振荡（牛鞭效应）</text>
+        </g>
+      </svg>
+    </div>
+
+    <div class="loop-controls fade-in">
+      <button class="btn active" data-loop="negative">负反馈 (B)</button>
+      <button class="btn" data-loop="positive">正反馈 (R)</button>
+      <button class="btn" data-loop="delay">延迟效应</button>
+    </div>
+
+    <div class="loop-info fade-in" id="loopInfo">
+      <div class="label">负反馈（平衡回路）</div>
+      <div>偏差 → 检测 → 修正 → 趋向目标。恒温器原理：温度偏离设定点 → 传感器检测 → 加热/制冷 → 回归设定点。回路中有奇数个负号。系统趋向稳定——但如果有延迟，可能出现振荡。</div>
+    </div>
+  </div>
+</section>
+
+<!-- VSM -->
+<section id="vsm">
+  <div class="container">
+    <h2 class="section-title fade-in">可行系统模型 VSM</h2>
+    <p class="section-desc fade-in">Stafford Beer — 任何可存活系统必须包含的5个子系统</p>
+
+    <div class="vsm-diagram fade-in" id="vsmDiagram">
+      <div class="vsm-layer" data-sys="5">
+        <div class="vsm-sys-num">S5</div>
+        <div class="vsm-main">
+          <div class="vsm-name">政策 / 身份</div>
+          <div class="vsm-role">平衡内外、定义系统存在的意义</div>
+        </div>
+      </div>
+      <div class="vsm-detail" data-detail="5">
+        <ul>
+          <li>平衡 S3（内部优化）和 S4（外部情报）的矛盾</li>
+          <li>在根本性危机中重新定义系统身份</li>
+          <li>回答"我们是谁？我们为什么存在？"</li>
+          <li>类比：CEO / 董事会 / 宪法</li>
+        </ul>
+      </div>
+
+      <div class="vsm-layer" data-sys="4">
+        <div class="vsm-sys-num">S4</div>
+        <div class="vsm-main">
+          <div class="vsm-name">情报 / 未来</div>
+          <div class="vsm-role">监测外部环境，建模未来</div>
+        </div>
+      </div>
+      <div class="vsm-detail" data-detail="4">
+        <ul>
+          <li>系统性扫描外部环境的变化和威胁</li>
+          <li>建模未来可能的场景</li>
+          <li>将发现传递给 S3 和 S5 做决策</li>
+          <li>类比：战略研究部 / R&D / 市场调研</li>
+        </ul>
+      </div>
+
+      <div class="vsm-layer" data-sys="3">
+        <div class="vsm-sys-num">S3</div>
+        <div class="vsm-main">
+          <div class="vsm-name">控制 / 优化</div>
+          <div class="vsm-role">全局资源分配，监控运营绩效</div>
+        </div>
+      </div>
+      <div class="vsm-detail" data-detail="3">
+        <ul>
+          <li>优化 S1 之间的资源分配</li>
+          <li>监控各 S1 的绩效指标</li>
+          <li>对 S1 下达指令并接收报告</li>
+          <li>类比：COO / 运营管理层</li>
+        </ul>
+      </div>
+
+      <div class="vsm-layer" data-sys="3s">
+        <div class="vsm-sys-num">S3*</div>
+        <div class="vsm-main">
+          <div class="vsm-name">审计通道</div>
+          <div class="vsm-role">绕过常规报告的直接检查</div>
+        </div>
+      </div>
+      <div class="vsm-detail" data-detail="3s">
+        <ul>
+          <li>突击检查 S1 的实际状态</li>
+          <li>发现 S1→S3 常规报告中的信息失真</li>
+          <li>防止"报喜不报忧"</li>
+          <li>类比：内审 / 随机抽查 / 暗访</li>
+        </ul>
+      </div>
+
+      <div class="vsm-layer" data-sys="2">
+        <div class="vsm-sys-num">S2</div>
+        <div class="vsm-main">
+          <div class="vsm-name">协调</div>
+          <div class="vsm-role">消除 S1 之间的振荡和冲突</div>
+        </div>
+      </div>
+      <div class="vsm-detail" data-detail="2">
+        <ul>
+          <li>标准化接口，减少 S1 之间的摩擦</li>
+          <li>调度和排期，防止资源争抢</li>
+          <li>协调是自动的、基于规则的（不是人治）</li>
+          <li>类比：调度系统 / 标准化协议 / SOP</li>
+        </ul>
+      </div>
+
+      <div class="vsm-layer" data-sys="1">
+        <div class="vsm-sys-num">S1</div>
+        <div class="vsm-main">
+          <div class="vsm-name">运营单元</div>
+          <div class="vsm-role">执行价值创造的基本单元（递归：每个S1也是完整VSM）</div>
+        </div>
+      </div>
+      <div class="vsm-detail" data-detail="1">
+        <ul>
+          <li>直接产出价值的业务单元</li>
+          <li>需要足够的自主权处理日常干扰</li>
+          <li><strong>递归原则：每个 S1 内部也包含完整的 S1-S5</strong></li>
+          <li>类比：业务部门 / 产品线 / 团队</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="vsm-channels fade-in">
+      <div class="vsm-channel">
+        <span class="channel-arrow">S3 ↔ S1</span>
+        <span>指令 / 报告通道</span>
+      </div>
+      <div class="vsm-channel">
+        <span class="channel-arrow">S4 ↔ 外部</span>
+        <span>环境扫描通道</span>
+      </div>
+      <div class="vsm-channel">
+        <span class="channel-arrow">S3 ↔ S4</span>
+        <span>内外平衡通道</span>
+      </div>
+      <div class="vsm-channel">
+        <span class="channel-arrow">S1 ↔ S1</span>
+        <span>横向协调通道</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Ashby -->
+<section id="ashby">
+  <div class="container">
+    <h2 class="section-title fade-in">Ashby 必要多样性定律</h2>
+    <p class="section-desc fade-in">"Only variety can absorb variety." — 控制器多样性必须 ≥ 干扰多样性</p>
+
+    <div class="ashby-visual fade-in">
+      <div class="ashby-bar-group">
+        <div class="ashby-bar-label">干扰多样性 V(D)</div>
+        <div class="ashby-bar-container">
+          <div class="ashby-bar-fill disturbance" id="ashbyDistBar" style="height:60%"></div>
+        </div>
+        <div class="ashby-bar-value" id="ashbyDistVal" style="color:var(--red)">60</div>
+      </div>
+
+      <div class="ashby-vs">vs</div>
+
+      <div class="ashby-bar-group">
+        <div class="ashby-bar-label">控制器多样性 V(R)</div>
+        <div class="ashby-bar-container">
+          <div class="ashby-bar-fill controller" id="ashbyCtrlBar" style="height:40%"></div>
+        </div>
+        <div class="ashby-bar-value" id="ashbyCtrlVal" style="color:var(--blue)">40</div>
+      </div>
+    </div>
+
+    <div class="ashby-verdict fail fade-in" id="ashbyVerdict">
+      V(R) < V(D) — 控制必然失败！缺口：20
+    </div>
+
+    <div class="ashby-sliders fade-in">
+      <div class="slider-group">
+        <label>干扰多样性</label>
+        <input type="range" id="ashbyDistSlider" min="10" max="100" value="60">
+      </div>
+      <div class="slider-group">
+        <label>控制器多样性</label>
+        <input type="range" id="ashbyCtrlSlider" min="10" max="100" value="40">
+      </div>
+    </div>
+
+    <div class="loop-info fade-in" style="max-width:700px;margin:24px auto 0">
+      <div class="label">怎么办？</div>
+      <div id="ashbyAdvice">
+        <strong>路径A 放大器</strong>：增加控制器多样性 — 赋予更多权限/工具/自动化<br>
+        <strong>路径B 衰减器</strong>：降低干扰多样性 — 标准化、过滤、缓冲<br>
+        <strong>路径C 组合</strong>：同时使用（通常最优）
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Leverage Points -->
+<section id="leverage">
+  <div class="container">
+    <h2 class="section-title fade-in">杠杆点 Leverage Points</h2>
+    <p class="section-desc fade-in">Donella Meadows — 干预系统效力从低到高的12个层级</p>
+
+    <div class="leverage-tower fade-in" id="leverageTower"></div>
+  </div>
+</section>
+
+<!-- CLD Builder -->
+<section id="cld-builder">
+  <div class="container">
+    <h2 class="section-title fade-in">因果回路构建器</h2>
+    <p class="section-desc fade-in">交互式绘制你自己的因果回路图</p>
+
+    <div class="cld-workspace fade-in">
+      <div class="cld-panel">
+        <h3>变量</h3>
+        <div class="cld-var-input">
+          <input type="text" id="cldVarInput" placeholder="输入变量名...">
+          <button id="cldAddVar">+</button>
+        </div>
+        <div class="cld-var-list" id="cldVarList"></div>
+
+        <div class="cld-link-section">
+          <h4>添加因果链接</h4>
+          <div class="cld-link-row">
+            <select id="cldFromVar"></select>
+            <span style="color:var(--text2)">→</span>
+            <select id="cldToVar"></select>
+            <button class="polarity-btn pos" id="cldPolarity" title="极性">+</button>
+            <button class="btn" id="cldAddLink" style="padding:6px 12px;font-size:0.82rem">连接</button>
+          </div>
+        </div>
+
+        <div style="margin-top:16px">
+          <button class="btn" id="cldDetectLoops" style="width:100%">检测回路</button>
+        </div>
+        <div id="cldLoopResult" style="margin-top:12px;font-size:0.82rem;color:var(--text2);min-height:20px"></div>
+
+        <div style="margin-top:12px">
+          <button class="btn" id="cldLoadExample" style="width:100%;font-size:0.82rem;padding:8px">载入示例</button>
+        </div>
+      </div>
+
+      <div class="cld-panel cld-canvas-wrap">
+        <svg id="cldSvg" viewBox="0 0 600 440">
+          <defs>
+            <marker id="cldArrowPos" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+              <polygon points="0 0, 10 3.5, 0 7" fill="#5de8a0"/>
+            </marker>
+            <marker id="cldArrowNeg" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+              <polygon points="0 0, 10 3.5, 0 7" fill="#e85d5d"/>
+            </marker>
+          </defs>
+          <g id="cldEdges"></g>
+          <g id="cldNodes"></g>
+          <g id="cldLoopLabels"></g>
+        </svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Agents -->
+<section id="agents">
+  <div class="container">
+    <h2 class="section-title fade-in">四大 Agent</h2>
+    <p class="section-desc fade-in">控制论分析的四个专项智能体</p>
+
+    <div class="agents-grid fade-in" id="agentsGrid">
+      <div class="agent-card red" data-agent="modeler">
+        <div class="agent-icon">&#9673;</div>
+        <div class="agent-name">系统建模师</div>
+        <div class="agent-en">System Modeler</div>
+        <div class="agent-desc">绘制反馈回路、因果回路图、存量流量模型，识别系统动力学结构</div>
+        <div class="agent-frameworks">
+          <span class="framework-tag">因果回路图</span>
+          <span class="framework-tag">存量-流量</span>
+          <span class="framework-tag">延迟分析</span>
+          <span class="framework-tag">杠杆点</span>
+        </div>
+        <div class="agent-expanded-content">
+          <div class="agent-process">
+            <ol>
+              <li><strong>系统素描</strong> — 列出所有变量（存量/流量/辅助）</li>
+              <li><strong>因果连接</strong> — 标注极性(+/-)和延迟</li>
+              <li><strong>回路分析</strong> — 识别每个R/B回路的增益和状态</li>
+              <li><strong>主导结构</strong> — 哪个回路当前主导？主导权会转移吗？</li>
+              <li><strong>杠杆点</strong> — 区分症状和结构性原因</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+
+      <div class="agent-card blue" data-agent="regulator">
+        <div class="agent-icon">&#9881;</div>
+        <div class="agent-name">调节器</div>
+        <div class="agent-en">Regulator</div>
+        <div class="agent-desc">设计控制机制，运用Ashby定律和VSM进行治理架构设计</div>
+        <div class="agent-frameworks">
+          <span class="framework-tag">Ashby定律</span>
+          <span class="framework-tag">VSM</span>
+          <span class="framework-tag">PID思维</span>
+          <span class="framework-tag">衰减/放大器</span>
+        </div>
+        <div class="agent-expanded-content">
+          <div class="agent-process">
+            <ol>
+              <li><strong>控制需求诊断</strong> — 被控对象、干扰源、现有控制器</li>
+              <li><strong>Ashby多样性审计</strong> — V(R) ≥ V(D)?</li>
+              <li><strong>多样性管理</strong> — 放大器 / 衰减器 / 组合</li>
+              <li><strong>VSM架构检查</strong> — S1-S5完整性</li>
+              <li><strong>控制机制设计</strong> — 传感器-比较器-执行器</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+
+      <div class="agent-card green" data-agent="signal">
+        <div class="agent-icon">&#9634;</div>
+        <div class="agent-name">信号分析师</div>
+        <div class="agent-en">Signal Analyst</div>
+        <div class="agent-desc">分析信息流、噪声、熵、沟通断裂，运用信息论和二阶控制论</div>
+        <div class="agent-frameworks">
+          <span class="framework-tag">信息流映射</span>
+          <span class="framework-tag">Shannon信道</span>
+          <span class="framework-tag">黑箱方法</span>
+          <span class="framework-tag">二阶控制论</span>
+        </div>
+        <div class="agent-expanded-content">
+          <div class="agent-process">
+            <ol>
+              <li><strong>信息流映射</strong> — 谁→什么→谁，画出拓扑</li>
+              <li><strong>信道评估</strong> — 容量/延迟/噪声/冗余</li>
+              <li><strong>病理诊断</strong> — 断裂/延迟/衰减/噪声/过载/失真</li>
+              <li><strong>黑箱分析</strong> — 不透明子系统的输入-输出建模</li>
+              <li><strong>二阶检查</strong> — 观察者效应、盲点、权力-信息纠缠</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+
+      <div class="agent-card yellow" data-agent="viability">
+        <div class="agent-icon">&#9670;</div>
+        <div class="agent-name">活力架构师</div>
+        <div class="agent-en">Viability Architect</div>
+        <div class="agent-desc">评估系统存活力和韧性，运用VSM递归分析和适应层级理论</div>
+        <div class="agent-frameworks">
+          <span class="framework-tag">VSM递归</span>
+          <span class="framework-tag">韧性审计</span>
+          <span class="framework-tag">适应层级</span>
+          <span class="framework-tag">自组织</span>
+        </div>
+        <div class="agent-expanded-content">
+          <div class="agent-process">
+            <ol>
+              <li><strong>系统身份</strong> — 为什么存在？边界？环境？</li>
+              <li><strong>VSM完整性</strong> — S1-S5 + S3* + 4条信道</li>
+              <li><strong>适应层级</strong> — 一阶(参数)/二阶(结构)/三阶(范式)</li>
+              <li><strong>韧性审计</strong> — 冗余/多样性/模块化/连通性</li>
+              <li><strong>自组织条件</strong> — 必要条件和障碍检查</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Diagnostic Tree -->
+<section id="diagnostic">
+  <div class="container">
+    <h2 class="section-title fade-in">控制论诊断树</h2>
+    <p class="section-desc fade-in">回答几个问题，匹配最适合你的分析框架和Agent</p>
+
+    <div class="diag-flow fade-in" id="diagFlow">
+      <div class="diag-question" id="diagQuestion">你的系统遇到了什么问题？</div>
+      <div class="diag-options" id="diagOptions"></div>
+      <div class="diag-result" id="diagResult"></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>控制论 · Cybernetics Interactive</p>
+  <p style="margin-top:8px">Wiener · Ashby · Beer · Shannon · Meadows</p>
+</footer>
+
+<script>
+// ===== NAV DOTS =====
+const navDots = document.querySelectorAll('.nav-dot');
+const sections = document.querySelectorAll('section');
+
+navDots.forEach(dot => {
+  dot.addEventListener('click', () => {
+    document.getElementById(dot.dataset.target).scrollIntoView({ behavior: 'smooth' });
+  });
+});
+
+const observerNav = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      navDots.forEach(d => d.classList.remove('active'));
+      const dot = document.querySelector(`.nav-dot[data-target="${entry.target.id}"]`);
+      if (dot) dot.classList.add('active');
+    }
+  });
+}, { threshold: 0.4 });
+
+sections.forEach(s => observerNav.observe(s));
+
+// ===== SCROLL FADE IN =====
+const observerFade = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) entry.target.classList.add('visible');
+  });
+}, { threshold: 0.15 });
+
+document.querySelectorAll('.fade-in').forEach(el => observerFade.observe(el));
+
+// ===== FEEDBACK LOOP SWITCH =====
+const loopData = {
+  negative: {
+    label: '负反馈（平衡回路）',
+    desc: '偏差 → 检测 → 修正 → 趋向目标。恒温器原理：温度偏离设定点 → 传感器检测 → 加热/制冷 → 回归设定点。回路中有奇数个负号。系统趋向稳定——但如果有延迟，可能出现振荡。'
+  },
+  positive: {
+    label: '正反馈（增强回路）',
+    desc: '偏差 → 放大 → 更大偏差。网络效应：用户越多 → 内容越多 → 吸引力越大 → 口碑传播 → 用户更多。回路中负号个数为偶数。可以是良性循环（增长飞轮），也可以是恶性循环（银行挤兑）。没有外部限制时指数增长或崩溃。'
+  },
+  delay: {
+    label: '延迟效应（牛鞭效应）',
+    desc: '延迟是振荡和不稳定的第一嫌疑犯。库存管理：需求信号 → 生产调整 → 库存变化 → 3周后才能感知实际效果 → 过度反应 → 振荡放大。延迟越长，振荡越剧烈。在虚线处标注延迟时长是控制论分析的关键步骤。'
+  }
+};
+
+document.querySelectorAll('.loop-controls .btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.loop-controls .btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const key = btn.dataset.loop;
+    document.querySelectorAll('.loop-group').forEach(g => { g.style.opacity = 0; g.style.display = 'none'; });
+    const target = document.getElementById('loop-' + key);
+    target.style.display = '';
+    requestAnimationFrame(() => { target.style.opacity = 1; target.style.transition = 'opacity 0.5s'; });
+    document.getElementById('loopInfo').innerHTML = `<div class="label">${loopData[key].label}</div><div>${loopData[key].desc}</div>`;
+  });
+});
+
+// ===== VSM ACCORDION =====
+document.querySelectorAll('.vsm-layer').forEach(layer => {
+  layer.addEventListener('click', () => {
+    const sys = layer.dataset.sys;
+    const detail = document.querySelector(`.vsm-detail[data-detail="${sys}"]`);
+    const wasOpen = detail.classList.contains('open');
+    document.querySelectorAll('.vsm-detail').forEach(d => d.classList.remove('open'));
+    document.querySelectorAll('.vsm-layer').forEach(l => l.classList.remove('expanded'));
+    if (!wasOpen) {
+      detail.classList.add('open');
+      layer.classList.add('expanded');
+    }
+  });
+});
+
+// ===== ASHBY INTERACTIVE =====
+const distSlider = document.getElementById('ashbyDistSlider');
+const ctrlSlider = document.getElementById('ashbyCtrlSlider');
+
+function updateAshby() {
+  const d = parseInt(distSlider.value);
+  const c = parseInt(ctrlSlider.value);
+  document.getElementById('ashbyDistBar').style.height = d + '%';
+  document.getElementById('ashbyCtrlBar').style.height = c + '%';
+  document.getElementById('ashbyDistVal').textContent = d;
+  document.getElementById('ashbyCtrlVal').textContent = c;
+  const verdict = document.getElementById('ashbyVerdict');
+  if (c >= d) {
+    verdict.className = 'ashby-verdict pass fade-in visible';
+    verdict.textContent = `V(R) ≥ V(D) — 控制可行！余量：${c - d}`;
+  } else {
+    verdict.className = 'ashby-verdict fail fade-in visible';
+    verdict.textContent = `V(R) < V(D) — 控制必然失败！缺口：${d - c}`;
+  }
+}
+
+distSlider.addEventListener('input', updateAshby);
+ctrlSlider.addEventListener('input', updateAshby);
+
+// ===== LEVERAGE POINTS =====
+const leverageData = [
+  { num: 12, name: '数字：参数调整', power: 8, detail: '调整数值（税率、价格、补贴额度）。最容易做，但效果最弱。系统结构不变，参数调来调去只是表面文章。', color: '#8a7f6f' },
+  { num: 11, name: '缓冲区大小', power: 15, detail: '改变存量的容量（水库大小、现金储备、库存缓冲）。缓冲区越大，系统越稳定，但成本也越高。', color: '#8a8060' },
+  { num: 10, name: '存量-流量结构', power: 22, detail: '改变物理结构（道路网络、供应链拓扑、组织架构）。一旦建成很难改变，所以设计阶段至关重要。', color: '#9a8a50' },
+  { num: 9, name: '延迟长度', power: 30, detail: '缩短或增加反馈延迟。延迟太长→振荡；太短→过度反应。找到合适的延迟是艺术。', color: '#aa9040' },
+  { num: 8, name: '负反馈回路强度', power: 38, detail: '增强平衡回路的力量（监管、审计、绩效考核）。民主制度、市场竞争都是负反馈机制。', color: '#b09535' },
+  { num: 7, name: '正反馈回路增益', power: 46, detail: '控制增强回路的增益（利率、病毒传播、军备竞赛）。正反馈是增长和崩溃的引擎。', color: '#b89a30' },
+  { num: 6, name: '信息流结构', power: 55, detail: '改变谁能看到什么信息。公开透明vs信息封锁。"让污染者住在排污口下游"——信息流改变行为。', color: '#c0a028' },
+  { num: 5, name: '系统规则', power: 64, detail: '改变激励结构、法规、游戏规则。宪法、合同、算法——规则定义了系统的可能行为空间。', color: '#c8a820' },
+  { num: 4, name: '自组织能力', power: 73, detail: '系统能否自己创造新结构？进化、学习、实验的自由度。扼杀自组织=扼杀适应能力。', color: '#d0b018' },
+  { num: 3, name: '系统目标', power: 82, detail: '改变系统追求的目标。GDP→GNH？利润最大化→可持续？目标改变，一切随之改变。', color: '#d8b810' },
+  { num: 2, name: '系统范式', power: 91, detail: '改变产生系统的心智模型。地心说→日心说、计划经济→市场经济。范式转换改变一切规则。', color: '#e0c008' },
+  { num: 1, name: '超越范式的能力', power: 100, detail: '不执着于任何范式。能在范式之间自如切换。"初心"——不被任何心智模型绑架的能力。最高杠杆点。', color: '#f0c080' },
+];
+
+const tower = document.getElementById('leverageTower');
+leverageData.forEach(lp => {
+  const row = document.createElement('div');
+  row.className = 'lever-row';
+  row.innerHTML = `
+    <div class="lever-num" style="color:${lp.color}">${lp.num}</div>
+    <div class="lever-bar" style="width:${lp.power * 0.6}%;background:${lp.color}"></div>
+    <div class="lever-name">${lp.name}</div>
+  `;
+  const detail = document.createElement('div');
+  detail.className = 'lever-detail';
+  detail.textContent = lp.detail;
+  row.addEventListener('click', () => {
+    const wasOpen = detail.classList.contains('open');
+    document.querySelectorAll('.lever-detail').forEach(d => d.classList.remove('open'));
+    document.querySelectorAll('.lever-row').forEach(r => r.classList.remove('selected'));
+    if (!wasOpen) {
+      detail.classList.add('open');
+      row.classList.add('selected');
+    }
+  });
+  tower.appendChild(row);
+  tower.appendChild(detail);
+});
+
+// ===== CLD BUILDER =====
+const cldState = {
+  vars: [],
+  links: [],
+  nodePositions: {},
+  dragging: null,
+  dragOffset: { x: 0, y: 0 }
+};
+
+const cldSvg = document.getElementById('cldSvg');
+const cldNodes = document.getElementById('cldNodes');
+const cldEdges = document.getElementById('cldEdges');
+const cldLoopLabels = document.getElementById('cldLoopLabels');
+
+function cldAddVar(name) {
+  if (!name || cldState.vars.includes(name)) return;
+  cldState.vars.push(name);
+  const angle = (cldState.vars.length - 1) * (2 * Math.PI / Math.max(cldState.vars.length, 1));
+  cldState.nodePositions[name] = {
+    x: 300 + 150 * Math.cos(angle - Math.PI / 2),
+    y: 220 + 130 * Math.sin(angle - Math.PI / 2)
+  };
+  cldRender();
+  cldUpdateSelects();
+  cldUpdateVarList();
+}
+
+function cldRemoveVar(name) {
+  cldState.vars = cldState.vars.filter(v => v !== name);
+  cldState.links = cldState.links.filter(l => l.from !== name && l.to !== name);
+  delete cldState.nodePositions[name];
+  // Rearrange remaining
+  cldState.vars.forEach((v, i) => {
+    const angle = i * (2 * Math.PI / Math.max(cldState.vars.length, 1));
+    cldState.nodePositions[v] = {
+      x: 300 + 150 * Math.cos(angle - Math.PI / 2),
+      y: 220 + 130 * Math.sin(angle - Math.PI / 2)
+    };
+  });
+  cldRender();
+  cldUpdateSelects();
+  cldUpdateVarList();
+}
+
+function cldUpdateVarList() {
+  const list = document.getElementById('cldVarList');
+  list.innerHTML = cldState.vars.map(v =>
+    `<div class="cld-var-item"><span>${v}</span><span class="delete-var" data-var="${v}">×</span></div>`
+  ).join('');
+  list.querySelectorAll('.delete-var').forEach(btn => {
+    btn.addEventListener('click', (e) => { e.stopPropagation(); cldRemoveVar(btn.dataset.var); });
+  });
+}
+
+function cldUpdateSelects() {
+  const opts = cldState.vars.map(v => `<option value="${v}">${v}</option>`).join('');
+  document.getElementById('cldFromVar').innerHTML = opts;
+  document.getElementById('cldToVar').innerHTML = opts;
+}
+
+function cldAddLink(from, to, polarity) {
+  if (!from || !to || from === to) return;
+  const exists = cldState.links.find(l => l.from === from && l.to === to);
+  if (exists) { exists.polarity = polarity; }
+  else { cldState.links.push({ from, to, polarity }); }
+  cldRender();
+}
+
+function cldRender() {
+  // Edges
+  let edgeHtml = '';
+  cldState.links.forEach(link => {
+    const from = cldState.nodePositions[link.from];
+    const to = cldState.nodePositions[link.to];
+    if (!from || !to) return;
+    const dx = to.x - from.x;
+    const dy = to.y - from.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    const nx = dx / dist;
+    const ny = dy / dist;
+    const x1 = from.x + nx * 30;
+    const y1 = from.y + ny * 30;
+    const x2 = to.x - nx * 34;
+    const y2 = to.y - ny * 34;
+    // Curve
+    const mx = (x1 + x2) / 2 - ny * 30;
+    const my = (y1 + y2) / 2 + nx * 30;
+    const color = link.polarity === '+' ? '#5de8a0' : '#e85d5d';
+    const marker = link.polarity === '+' ? 'cldArrowPos' : 'cldArrowNeg';
+    edgeHtml += `<path d="M${x1},${y1} Q${mx},${my} ${x2},${y2}" fill="none" stroke="${color}" stroke-width="1.5" marker-end="url(#${marker})" opacity="0.7"/>`;
+    // Label
+    const lx = (x1 + 2 * mx + x2) / 4;
+    const ly = (y1 + 2 * my + y2) / 4;
+    edgeHtml += `<text x="${lx}" y="${ly}" class="cld-edge-label" fill="${color}">${link.polarity}</text>`;
+  });
+  cldEdges.innerHTML = edgeHtml;
+
+  // Nodes
+  let nodeHtml = '';
+  cldState.vars.forEach(v => {
+    const pos = cldState.nodePositions[v];
+    if (!pos) return;
+    nodeHtml += `<g class="cld-node" data-var="${v}" transform="translate(${pos.x},${pos.y})">
+      <circle r="28" fill="rgba(26,26,46,0.8)" stroke="#d4a574" stroke-width="1.5"/>
+      <text>${v}</text>
+    </g>`;
+  });
+  cldNodes.innerHTML = nodeHtml;
+
+  // Drag handlers
+  cldNodes.querySelectorAll('.cld-node').forEach(node => {
+    node.addEventListener('mousedown', (e) => {
+      cldState.dragging = node.dataset.var;
+      const pos = cldState.nodePositions[cldState.dragging];
+      const pt = svgPoint(e);
+      cldState.dragOffset = { x: pt.x - pos.x, y: pt.y - pos.y };
+      e.preventDefault();
+    });
+  });
+}
+
+function svgPoint(e) {
+  const rect = cldSvg.getBoundingClientRect();
+  const vb = cldSvg.viewBox.baseVal;
+  return {
+    x: (e.clientX - rect.left) / rect.width * vb.width,
+    y: (e.clientY - rect.top) / rect.height * vb.height
+  };
+}
+
+cldSvg.addEventListener('mousemove', (e) => {
+  if (!cldState.dragging) return;
+  const pt = svgPoint(e);
+  cldState.nodePositions[cldState.dragging] = {
+    x: Math.max(30, Math.min(570, pt.x - cldState.dragOffset.x)),
+    y: Math.max(30, Math.min(410, pt.y - cldState.dragOffset.y))
+  };
+  cldRender();
+});
+
+document.addEventListener('mouseup', () => { cldState.dragging = null; });
+
+// Add var
+document.getElementById('cldAddVar').addEventListener('click', () => {
+  const input = document.getElementById('cldVarInput');
+  cldAddVar(input.value.trim());
+  input.value = '';
+});
+
+document.getElementById('cldVarInput').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    cldAddVar(e.target.value.trim());
+    e.target.value = '';
+  }
+});
+
+// Polarity toggle
+const polarityBtn = document.getElementById('cldPolarity');
+polarityBtn.addEventListener('click', () => {
+  if (polarityBtn.textContent === '+') {
+    polarityBtn.textContent = '−';
+    polarityBtn.className = 'polarity-btn neg';
+  } else {
+    polarityBtn.textContent = '+';
+    polarityBtn.className = 'polarity-btn pos';
+  }
+});
+
+// Add link
+document.getElementById('cldAddLink').addEventListener('click', () => {
+  const from = document.getElementById('cldFromVar').value;
+  const to = document.getElementById('cldToVar').value;
+  const pol = polarityBtn.textContent === '+' ? '+' : '-';
+  cldAddLink(from, to, pol);
+});
+
+// Detect loops
+document.getElementById('cldDetectLoops').addEventListener('click', () => {
+  const loops = findLoops();
+  const result = document.getElementById('cldLoopResult');
+  cldLoopLabels.innerHTML = '';
+  if (loops.length === 0) {
+    result.innerHTML = '<span style="color:var(--text2)">未检测到闭合回路</span>';
+    return;
+  }
+  let html = '';
+  loops.forEach((loop, i) => {
+    const negCount = loop.edges.filter(e => e.polarity === '-').length;
+    const type = negCount % 2 === 0 ? 'R' : 'B';
+    const typeLabel = type === 'R' ? '增强' : '平衡';
+    const color = type === 'R' ? 'var(--red)' : 'var(--green)';
+    html += `<div style="color:${color};margin-bottom:4px"><strong>${type}${i + 1}</strong> (${typeLabel}): ${loop.path.join(' → ')} → ${loop.path[0]}</div>`;
+
+    // Add label to SVG
+    let cx = 0, cy = 0;
+    loop.path.forEach(v => { cx += cldState.nodePositions[v].x; cy += cldState.nodePositions[v].y; });
+    cx /= loop.path.length;
+    cy /= loop.path.length;
+    cldLoopLabels.innerHTML += `<text x="${cx}" y="${cy}" class="cld-loop-label" fill="${color === 'var(--red)' ? '#e85d5d' : '#5de8a0'}">${type}${i + 1}</text>`;
+  });
+  result.innerHTML = html;
+});
+
+function findLoops() {
+  const loops = [];
+  const adj = {};
+  cldState.vars.forEach(v => { adj[v] = []; });
+  cldState.links.forEach(l => { adj[l.from].push({ to: l.to, polarity: l.polarity }); });
+
+  function dfs(start, current, path, edges, visited) {
+    for (const edge of adj[current]) {
+      if (edge.to === start && path.length >= 2) {
+        loops.push({ path: [...path], edges: [...edges, edge] });
+        continue;
+      }
+      if (!visited.has(edge.to)) {
+        visited.add(edge.to);
+        dfs(start, edge.to, [...path, edge.to], [...edges, edge], visited);
+        visited.delete(edge.to);
+      }
+    }
+  }
+
+  cldState.vars.forEach(v => {
+    const visited = new Set([v]);
+    dfs(v, v, [v], [], visited);
+  });
+
+  // Deduplicate
+  const seen = new Set();
+  return loops.filter(loop => {
+    const sorted = [...loop.path].sort().join(',');
+    if (seen.has(sorted)) return false;
+    seen.add(sorted);
+    return true;
+  });
+}
+
+// Load example
+document.getElementById('cldLoadExample').addEventListener('click', () => {
+  cldState.vars = [];
+  cldState.links = [];
+  cldState.nodePositions = {};
+
+  const exVars = ['需求', '收入', '投入', '质量', '口碑'];
+  const positions = [
+    { x: 300, y: 60 },
+    { x: 500, y: 160 },
+    { x: 460, y: 350 },
+    { x: 140, y: 350 },
+    { x: 100, y: 160 }
+  ];
+  exVars.forEach((v, i) => {
+    cldState.vars.push(v);
+    cldState.nodePositions[v] = { ...positions[i] };
+  });
+
+  cldState.links = [
+    { from: '需求', to: '收入', polarity: '+' },
+    { from: '收入', to: '投入', polarity: '+' },
+    { from: '投入', to: '质量', polarity: '+' },
+    { from: '质量', to: '口碑', polarity: '+' },
+    { from: '口碑', to: '需求', polarity: '+' },
+    { from: '投入', to: '质量', polarity: '+' },
+  ];
+
+  cldRender();
+  cldUpdateSelects();
+  cldUpdateVarList();
+});
+
+// ===== AGENTS EXPAND =====
+document.querySelectorAll('.agent-card').forEach(card => {
+  card.addEventListener('click', () => {
+    const wasExpanded = card.classList.contains('expanded');
+    document.querySelectorAll('.agent-card').forEach(c => c.classList.remove('expanded'));
+    if (!wasExpanded) card.classList.add('expanded');
+  });
+});
+
+// ===== DIAGNOSTIC TREE =====
+const diagTree = {
+  start: {
+    question: '你的系统遇到了什么问题？',
+    options: [
+      { text: '系统不稳定、振荡、恶性循环', icon: '🔄', hint: '越来越差、失控感', next: 'unstable' },
+      { text: '不知道怎么设计控制/治理机制', icon: '⚙️', hint: '规则缺失、管不住', next: 'control' },
+      { text: '信息不通、沟通断裂、决策慢', icon: '📡', hint: '该知道的人不知道', next: 'info' },
+      { text: '系统脆弱，担心能否存活/适应', icon: '🛡️', hint: '韧性不足、转型焦虑', next: 'viability' },
+      { text: '想全面理解一个系统', icon: '🗺️', hint: '画全景、看结构', next: 'overview' },
+    ]
+  },
+  unstable: {
+    question: '不稳定的表现更像哪种？',
+    options: [
+      { text: '周期性振荡（好坏交替）', icon: '〰️', hint: '波动、过度反应', next: 'result_delay' },
+      { text: '持续恶化（越来越差）', icon: '📉', hint: '恶性循环、雪崩', next: 'result_positive' },
+      { text: '突然崩溃（之前看着还好）', icon: '💥', hint: '临界点、相变', next: 'result_tipping' },
+    ]
+  },
+  control: {
+    question: '你想控制的对象是什么类型？',
+    options: [
+      { text: '组织/团队', icon: '👥', hint: '人员、流程、职责', next: 'result_org_control' },
+      { text: '技术系统', icon: '🖥️', hint: '软件、基础设施、自动化', next: 'result_tech_control' },
+      { text: '市场/外部力量', icon: '🌊', hint: '竞争、需求、政策', next: 'result_market_control' },
+    ]
+  },
+  info: {
+    question: '信息问题的核心症状？',
+    options: [
+      { text: '信息到不了该去的地方', icon: '🚫', hint: '断裂、孤岛', next: 'result_info_break' },
+      { text: '信息太多处理不了', icon: '📊', hint: '过载、噪声', next: 'result_info_overload' },
+      { text: '信息被扭曲/失真', icon: '🪞', hint: '报喜不报忧', next: 'result_info_distort' },
+    ]
+  },
+  viability: {
+    question: '你最担心系统的哪个方面？',
+    options: [
+      { text: '单点故障、缺乏冗余', icon: '🎯', hint: '一个环节出问题就全崩', next: 'result_spof' },
+      { text: '无法适应环境变化', icon: '🦎', hint: '僵化、路径依赖', next: 'result_adapt' },
+      { text: '组织架构/结构不合理', icon: '🏗️', hint: '职责不清、层级问题', next: 'result_struct' },
+    ]
+  },
+  overview: {
+    result: true,
+    agent: '系统建模师',
+    agentColor: 'var(--red)',
+    frameworks: ['因果回路图', '存量-流量模型', '杠杆点(Meadows)', '反馈回路分析'],
+    advice: '先用系统建模师画出完整的因果回路图，识别所有反馈回路和延迟点。然后根据发现的具体问题，再调用专项Agent深入分析。'
+  },
+  result_delay: {
+    result: true,
+    agent: '系统建模师',
+    agentColor: 'var(--red)',
+    frameworks: ['反馈回路分析', '延迟分析', '因果回路图', '存量-流量'],
+    advice: '振荡的典型原因是负反馈回路中存在延迟。决策者看到的是过去的状态，做出的修正等传导到位时已经过度了。关键：找到延迟点，缩短延迟或降低反应增益。'
+  },
+  result_positive: {
+    result: true,
+    agent: '系统建模师',
+    agentColor: 'var(--red)',
+    frameworks: ['正反馈回路', '因果回路图', '杠杆点', 'Ashby定律'],
+    advice: '持续恶化说明正反馈（增强回路）主导了系统行为，而制衡的负反馈太弱或被绕过。关键：识别主导的正反馈回路，增强对应的负反馈（监管、限制、缓冲）。'
+  },
+  result_tipping: {
+    result: true,
+    agent: '活力架构师',
+    agentColor: 'var(--yellow)',
+    frameworks: ['适应层级', '韧性审计', '临界点/相变', 'VSM'],
+    advice: '突然崩溃说明系统在不知不觉中越过了临界点（相变）。通常是正反馈持续积累，某个阈值被突破后快速级联。关键：识别阈值参数和预警指标，增加缓冲区。'
+  },
+  result_org_control: {
+    result: true,
+    agent: '调节器',
+    agentColor: 'var(--blue)',
+    frameworks: ['VSM', 'Ashby定律', '反馈控制设计', '递归原则'],
+    advice: '组织控制的核心是VSM——检查S1-S5是否完整，信道是否通畅。然后用Ashby定律审计管理层的多样性是否够用。关键：给S1足够自主权，S2做好协调，S3*别忘了审计通道。'
+  },
+  result_tech_control: {
+    result: true,
+    agent: '调节器',
+    agentColor: 'var(--blue)',
+    frameworks: ['Ashby定律', 'PID思维', '黑箱方法', '反馈控制设计'],
+    advice: '技术系统用经典控制论思路：传感器-比较器-执行器。Ashby审计错误处理路径覆盖度。用PID思维调整响应：比例(当前偏差)、积分(累积偏差)、微分(变化趋势)。'
+  },
+  result_market_control: {
+    result: true,
+    agent: '调节器 + 信号分析师',
+    agentColor: 'var(--blue)',
+    frameworks: ['Ashby定律(衰减器)', '黑箱方法', '信息流映射', '二阶控制论'],
+    advice: '对外部力量你无法直接控制——只能管理接口。用衰减器降低干扰多样性（标准化、过滤、对冲），用黑箱方法建立输入-输出模型。别忘了二阶检查：你的干预也是市场的一部分。'
+  },
+  result_info_break: {
+    result: true,
+    agent: '信号分析师',
+    agentColor: 'var(--green)',
+    frameworks: ['信息流映射', 'Shannon信道', 'VSM信道检查', '信息病理诊断'],
+    advice: '先画出完整的信息流拓扑图——谁产生信息、经过谁、到达谁。找到断裂点。常见原因：通道缺失、组织孤岛、激励不鼓励分享。修复：建立直通通道，减少中间环节。'
+  },
+  result_info_overload: {
+    result: true,
+    agent: '信号分析师',
+    agentColor: 'var(--green)',
+    frameworks: ['信息与熵', '信噪比', 'Ashby衰减器', '信息架构'],
+    advice: '信息过载 = 输入速率 > 处理能力。不是信息太多，是过滤太少。解法：加衰减器（优先级、汇总、仪表盘）、提高信噪比（干掉无用通知）、增加缓冲（异步处理）。'
+  },
+  result_info_distort: {
+    result: true,
+    agent: '信号分析师',
+    agentColor: 'var(--green)',
+    frameworks: ['二阶控制论', '信息病理(失真)', 'VSM S3*审计', '激励分析'],
+    advice: '信息失真通常不是技术问题而是激励问题——传递真实信息会受罚（杀信使效应）。二阶检查：权力结构如何塑造了信息流？修复：建立安全的审计通道(S3*)，改变激励结构。'
+  },
+  result_spof: {
+    result: true,
+    agent: '活力架构师',
+    agentColor: 'var(--yellow)',
+    frameworks: ['韧性审计(冗余)', '模块化分析', 'VSM', '自组织条件'],
+    advice: '单点故障 = 缺乏冗余 + 过度耦合。韧性审计四要素：冗余（关键功能有备份吗？）、模块化（故障能隔离吗？）、多样性（不同方案应对不同故障）、连通性（模块间能协调吗？）。'
+  },
+  result_adapt: {
+    result: true,
+    agent: '活力架构师',
+    agentColor: 'var(--yellow)',
+    frameworks: ['适应层级', 'VSM S4情报', '自组织', 'Ashby定律'],
+    advice: '无法适应说明系统卡在一阶适应（只能调参数），而环境要求二阶（改结构）甚至三阶（换范式）。检查S4（有没有在看外部？）、自组织条件（有没有实验的空间？）。'
+  },
+  result_struct: {
+    result: true,
+    agent: '活力架构师',
+    agentColor: 'var(--yellow)',
+    frameworks: ['VSM完整性诊断', '递归分析', 'Ashby定律', '信道分析'],
+    advice: '用VSM做完整性诊断——逐一检查S1-S5哪个缺失或萎缩。递归检查：每个S1内部的VSM是否完整？信道是否通畅？最常见的问题：S2(协调)缺失、S4(情报)萎缩、S3*(审计)不存在。'
+  }
+};
+
+let diagCurrent = 'start';
+
+function diagRender() {
+  const node = diagTree[diagCurrent];
+  const question = document.getElementById('diagQuestion');
+  const options = document.getElementById('diagOptions');
+  const result = document.getElementById('diagResult');
+
+  if (node.result) {
+    question.style.display = 'none';
+    options.innerHTML = '';
+    result.className = 'diag-result show';
+    result.innerHTML = `
+      <h3>诊断结果</h3>
+      <div class="result-agent" style="background:${node.agentColor}22;border:1px solid ${node.agentColor}44;color:${node.agentColor}">
+        推荐 Agent：${node.agent}
+      </div>
+      <p style="margin-top:16px;line-height:1.9">${node.advice}</p>
+      <div class="result-frameworks">
+        ${node.frameworks.map(f => `<span class="framework-tag" style="border-color:${node.agentColor}44;color:${node.agentColor}">${f}</span>`).join('')}
+      </div>
+      <div class="diag-reset">
+        <button class="btn" id="diagResetBtn">重新诊断</button>
+      </div>
+    `;
+    document.getElementById('diagResetBtn').addEventListener('click', () => {
+      diagCurrent = 'start';
+      question.style.display = '';
+      result.className = 'diag-result';
+      diagRender();
+    });
+    return;
+  }
+
+  question.textContent = node.question;
+  question.style.display = '';
+  result.className = 'diag-result';
+  options.innerHTML = node.options.map(opt => `
+    <div class="diag-option" data-next="${opt.next}">
+      <span class="opt-icon">${opt.icon}</span>
+      <div>
+        <div class="opt-text">${opt.text}</div>
+        <div class="opt-hint">${opt.hint}</div>
+      </div>
+    </div>
+  `).join('');
+
+  options.querySelectorAll('.diag-option').forEach(opt => {
+    opt.addEventListener('click', () => {
+      diagCurrent = opt.dataset.next;
+      diagRender();
+    });
+  });
+}
+
+diagRender();
+</script>
+</body>
+</html>

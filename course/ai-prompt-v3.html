@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>AI提问的艺术 V3</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  @page { size: 1280px 720px; margin: 0; }
+  body { font-family: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif; background: #000; color: #fff; }
+  .slide { width: 1280px; height: 720px; position: relative; overflow: hidden; page-break-after: always; page-break-inside: avoid; }
+  .slide-footer { position: absolute; bottom: 14px; right: 36px; font-size: 11px; color: rgba(255,255,255,0.15); letter-spacing: 1px; }
+  .bg-dark { background: linear-gradient(180deg, #0d0d1a 0%, #151528 100%); }
+  .badge { display: inline-block; padding: 6px 24px; border-radius: 20px; font-size: 14px; font-weight: 700; letter-spacing: 1px; }
+  .card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 24px; }
+  .card-accent { border-left: 3px solid; }
+  .formula-bar { background: linear-gradient(135deg, rgba(255,210,0,0.12), rgba(247,151,30,0.08)); border: 1px solid rgba(255,210,0,0.25); border-radius: 14px; padding: 22px 32px; text-align: center; }
+  .formula-bar .f-main { font-size: 26px; font-weight: 900; color: #ffd200; }
+  .formula-bar .f-sub { font-size: 14px; color: rgba(255,255,255,0.5); margin-top: 6px; }
+  :root { --red: #ff6b6b; --orange: #ffa502; --yellow: #ffd200; --green: #7bed9f; --blue: #70a1ff; --indigo: #5352ed; --purple: #a29bfe; --pink: #fd79a8; --teal: #00cec9; --coral: #e17055; }
+  .c-red { color: var(--red); } .c-orange { color: var(--orange); } .c-yellow { color: var(--yellow); }
+  .c-green { color: var(--green); } .c-blue { color: var(--blue); } .c-indigo { color: var(--indigo); }
+  .c-purple { color: var(--purple); } .c-pink { color: var(--pink); } .c-teal { color: var(--teal); }
+  .c-coral { color: var(--coral); } .fw9 { font-weight: 900; } .fw7 { font-weight: 700; }
+  .cmp-grid { display: grid; grid-template-columns: 0.8fr 1.1fr 1.5fr; gap: 12px; height: 100%; }
+  .cmp-box { border-radius: 14px; padding: 16px 18px; display: flex; flex-direction: column; overflow: hidden; }
+  .cmp-box .tag { display: inline-block; padding: 3px 12px; border-radius: 10px; font-size: 11px; font-weight: 700; margin-bottom: 10px; align-self: flex-start; }
+  .cmp-box .txt { font-size: 12.5px; line-height: 1.55; white-space: pre-wrap; flex: 1; }
+  .cmp-L1 { background: rgba(255,107,107,0.08); border: 1px solid rgba(255,107,107,0.25); }
+  .cmp-L1 .tag { background: rgba(255,107,107,0.2); color: var(--red); }
+  .cmp-L2 { background: rgba(112,161,255,0.08); border: 1px solid rgba(112,161,255,0.25); }
+  .cmp-L2 .tag { background: rgba(112,161,255,0.2); color: var(--blue); }
+  .cmp-L3 { background: rgba(255,210,0,0.08); border: 1px solid rgba(255,210,0,0.25); }
+  .cmp-L3 .tag { background: rgba(255,210,0,0.2); color: var(--yellow); }
+  .output-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  .output-box { border-radius: 14px; padding: 18px 20px; }
+  .output-box .out-label { font-size: 11px; font-weight: 700; letter-spacing: 1px; margin-bottom: 10px; }
+  .output-box .out-content { font-size: 13px; line-height: 1.7; color: rgba(255,255,255,0.85); }
+  .output-box .out-verdict { margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 12px; font-weight: 700; }
+  .out-bad { background: rgba(255,107,107,0.06); border: 1px solid rgba(255,107,107,0.2); }
+  .out-ok { background: rgba(112,161,255,0.06); border: 1px solid rgba(112,161,255,0.2); }
+  .out-great { background: rgba(255,210,0,0.06); border: 1px solid rgba(255,210,0,0.2); }
+  .score-bar { display: flex; align-items: center; gap: 8px; margin: 4px 0; }
+  .score-bar .bar-bg { flex: 1; height: 6px; background: rgba(255,255,255,0.08); border-radius: 3px; overflow: hidden; }
+  .score-bar .bar-fill { height: 100%; border-radius: 3px; }
+  .score-bar .bar-label { font-size: 11px; min-width: 60px; color: rgba(255,255,255,0.5); }
+  .score-bar .bar-val { font-size: 12px; font-weight: 700; min-width: 30px; text-align: right; }
+  .pitfall-card { background: rgba(255,107,107,0.06); border: 1px solid rgba(255,107,107,0.2); border-radius: 12px; padding: 16px 20px; margin-bottom: 10px; }
+  .pitfall-card .pit-wrong { font-size: 14px; color: var(--red); text-decoration: line-through; opacity: 0.7; }
+  .pitfall-card .pit-right { font-size: 14px; color: var(--green); margin-top: 6px; }
+  .pitfall-card .pit-why { font-size: 12px; color: rgba(255,255,255,0.4); margin-top: 4px; }
+  .progress-track { display: flex; gap: 4px; margin: 8px 0; }
+  .progress-dot { width: 36px; height: 5px; border-radius: 3px; background: rgba(255,255,255,0.08); }
+  .progress-dot.active { background: var(--yellow); }
+  .progress-dot.done { background: rgba(255,210,0,0.3); }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  .practice-box { background: rgba(255,210,0,0.06); border: 1px dashed rgba(255,210,0,0.25); border-radius: 12px; padding: 18px 22px; }
+</style>
+</head>
+<body>
+
+<!-- ======================== 封面 ======================== -->
+<div class="slide" style="background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center">
+  <div style="position:absolute;width:600px;height:600px;border-radius:50%;border:1px solid rgba(255,215,0,0.08);top:-150px;right:-100px"></div>
+  <div class="badge" style="background:linear-gradient(90deg,#f7971e,#ffd200);color:#1a1a2e;font-size:16px;margin-bottom:36px">10堂系统课程 · 从小白到高手</div>
+  <div style="font-size:60px;font-weight:900;background:linear-gradient(90deg,#ffd200,#f7971e,#ff6b6b);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1.3;margin-bottom:16px">AI提问的艺术</div>
+  <div style="font-size:24px;color:rgba(255,255,255,0.6);font-weight:300;margin-bottom:48px">学会向AI提问，让每个行业都能写出爆款短视频文案</div>
+  <div style="display:flex;gap:40px;font-size:14px;color:rgba(255,255,255,0.35)">
+    <span>10个行业实战案例</span><span>·</span>
+    <span>普通人 → 高手 → 顶级高手 三级进阶</span><span>·</span>
+    <span>附万能RECIPE提问模板</span>
+  </div>
+</div>
+
+<!-- ======================== 灵魂拷问 ======================== -->
+<div class="slide bg-dark" style="display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:60px 120px">
+  <div style="font-size:42px;font-weight:900;line-height:1.5;margin-bottom:40px">
+    同样一句<span class="c-yellow">"帮我写个短视频文案"</span><br>
+    为什么有人拿到<span class="c-red">废话</span>，有人拿到<span class="c-green">爆款</span>？
+  </div>
+  <div style="display:flex;gap:60px;margin-bottom:40px">
+    <div style="text-align:center">
+      <div style="font-size:72px;font-weight:900;color:var(--red);opacity:0.8">90%</div>
+      <div style="font-size:16px;color:rgba(255,255,255,0.5)">的人只告诉AI"做什么"</div>
+      <div style="font-size:14px;color:var(--red);margin-top:8px">→ 得到通用废话</div>
+    </div>
+    <div style="font-size:48px;color:rgba(255,255,255,0.1);align-self:center">VS</div>
+    <div style="text-align:center">
+      <div style="font-size:72px;font-weight:900;color:var(--green);opacity:0.8">10%</div>
+      <div style="font-size:16px;color:rgba(255,255,255,0.5)">的人告诉AI"怎么写到什么程度"</div>
+      <div style="font-size:14px;color:var(--green);margin-top:8px">→ 直接可发布的爆款文案</div>
+    </div>
+  </div>
+  <div class="formula-bar" style="width:100%">
+    <div class="f-main">差距不在AI，在你的提问</div>
+    <div class="f-sub">这门课教你：如何让AI写出有钩子、有共鸣、有转化力的短视频文案</div>
+  </div>
+</div>
+
+<!-- ======================== 什么是短视频文案 ======================== -->
+<div class="slide bg-dark" style="padding:50px 60px">
+  <div style="font-size:32px;font-weight:900;margin-bottom:28px">先搞清楚：<span class="c-yellow">短视频文案到底是什么？</span></div>
+  <div class="two-col" style="margin-bottom:24px">
+    <div class="card card-accent" style="border-color:var(--yellow)">
+      <div style="font-size:20px;font-weight:700;color:var(--yellow);margin-bottom:16px">短视频文案 = 文字的力量</div>
+      <div style="font-size:15px;line-height:2.2;color:rgba(255,255,255,0.7)">
+        <span class="c-yellow fw7">钩子</span> —— 前3秒让人停下来的那句话<br>
+        <span class="c-yellow fw7">口播词</span> —— 对着镜头说的每一句<br>
+        <span class="c-yellow fw7">字幕</span> —— 屏幕上显示的关键文字<br>
+        <span class="c-yellow fw7">标题</span> —— 让人点进来的那行字<br>
+        <span class="c-yellow fw7">评论区</span> —— 引导互动的预埋话术<br>
+        <span class="c-yellow fw7">引导语</span> —— 让人关注/下单/私信的收尾
+      </div>
+    </div>
+    <div class="card" style="border:1px solid rgba(255,255,255,0.15)">
+      <div style="font-size:20px;font-weight:700;color:rgba(255,255,255,0.4);margin-bottom:16px">短视频脚本 ≠ 本课内容</div>
+      <div style="font-size:15px;line-height:2.2;color:rgba(255,255,255,0.35)">
+        <span style="text-decoration:line-through">镜头1：中景，演员从左入画</span><br>
+        <span style="text-decoration:line-through">机位：45度俯拍，浅景深</span><br>
+        <span style="text-decoration:line-through">转场：淡入淡出，0.5秒</span><br>
+        <span style="text-decoration:line-through">运镜：推拉摇移</span><br>
+        <span style="text-decoration:line-through">灯光：主光+补光+轮廓光</span><br>
+        <span style="font-size:13px;margin-top:8px;display:block">这些是给摄影师的，不是今天学的</span>
+      </div>
+    </div>
+  </div>
+  <div class="formula-bar">
+    <div class="f-main">文案决定"说什么" · 脚本决定"怎么拍"</div>
+    <div class="f-sub">90%的爆款，赢在文案。拍摄技术是锦上添花，文字才是核心竞争力</div>
+  </div>
+</div>
+
+<!-- ======================== 目录 ======================== -->
+<div class="slide bg-dark" style="padding:50px 70px">
+  <div style="font-size:36px;font-weight:900;color:var(--yellow);margin-bottom:32px">课程路线图 · 10堂课 · 10个行业 · 10项文案核心技能</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+    <div class="card" style="padding:14px 20px;border-left:3px solid var(--red);display:flex;align-items:center;gap:16px"><div style="font-size:26px;font-weight:900;color:var(--red);min-width:36px">01</div><div><div style="font-size:16px;font-weight:700">餐饮行业</div><div style="font-size:13px;color:rgba(255,255,255,0.4)">文案基础：钩子+口播+字幕+引导语</div></div></div>
+    <div class="card" style="padding:14px 20px;border-left:3px solid var(--orange);display:flex;align-items:center;gap:16px"><div style="font-size:26px;font-weight:900;color:var(--orange);min-width:36px">02</div><div><div style="font-size:16px;font-weight:700">美妆行业</div><div style="font-size:13px;color:rgba(255,255,255,0.4)">情绪文案：让AI写出种草感的文字</div></div></div>
+    <div class="card" style="padding:14px 20px;border-left:3px solid var(--yellow);display:flex;align-items:center;gap:16px"><div style="font-size:26px;font-weight:900;color:var(--yellow);min-width:36px">03</div><div><div style="font-size:16px;font-weight:700">教育培训</div><div style="font-size:13px;color:rgba(255,255,255,0.4)">焦虑文案：精准戳中痛点的话术</div></div></div>
+    <div class="card" style="padding:14px 20px;border-left:3px solid var(--green);display:flex;align-items:center;gap:16px"><div style="font-size:26px;font-weight:900;color:var(--green);min-width:36px">04</div><div><div style="font-size:16px;font-weight:700">房产行业</div><div style="font-size:13px;color:rgba(255,255,255,0.4)">数据文案：用数字说服人的写法</div></div></div>
+    <div class="card" style="padding:14px 20px;border-left:3px solid var(--blue);display:flex;align-items:center;gap:16px"><div style="font-size:26px;font-weight:900;color:var(--blue);min-width:36px">05</div><div><div style="font-size:16px;font-weight:700">健身行业</div><div style="font-size:13px;color:rgba(255,255,255,0.4)">IP文案：写出"只有你能说"的人设感</div></div></div>
+    <div class="card" style="padding:14px 20px;border-left:3px solid var(--indigo);display:flex;align-items:center;gap:16px"><div style="font-size:26px;font-weight:900;color:var(--indigo);min-width:36px">06</div><div><div style="font-size:16px;font-weight:700">母婴行业</div><div style="font-size:13px;color:rgba(255,255,255,0.4)">信任文案：写出"妈妈味"的真实感</div></div></div>
+    <div class="card" style="padding:14px 20px;border-left:3px solid var(--purple);display:flex;align-items:center;gap:16px"><div style="font-size:26px;font-weight:900;color:var(--purple);min-width:36px">07</div><div><div style="font-size:16px;font-weight:700">服装行业</div><div style="font-size:13px;color:rgba(255,255,255,0.4)">场景文案：把衣服写进生活故事里</div></div></div>
+    <div class="card" style="padding:14px 20px;border-left:3px solid var(--pink);display:flex;align-items:center;gap:16px"><div style="font-size:26px;font-weight:900;color:var(--pink);min-width:36px">08</div><div><div style="font-size:16px;font-weight:700">旅游行业</div><div style="font-size:13px;color:rgba(255,255,255,0.4)">感官文案：五感描写让人"看了就想去"</div></div></div>
+    <div class="card" style="padding:14px 20px;border-left:3px solid var(--teal);display:flex;align-items:center;gap:16px"><div style="font-size:26px;font-weight:900;color:var(--teal);min-width:36px">09</div><div><div style="font-size:16px;font-weight:700">本地生活</div><div style="font-size:13px;color:rgba(255,255,255,0.4)">方言文案：让AI说"本地话"的地域感</div></div></div>
+    <div class="card" style="padding:14px 20px;border-left:3px solid var(--coral);display:flex;align-items:center;gap:16px"><div style="font-size:26px;font-weight:900;color:var(--coral);min-width:36px">10</div><div><div style="font-size:16px;font-weight:700">知识付费</div><div style="font-size:13px;color:rgba(255,255,255,0.4)">终极整合：RECIPE万能提问框架</div></div></div>
+  </div>
+</div>
+
+<!-- ======================== 三级金字塔 ======================== -->
+<div class="slide bg-dark" style="padding:50px 60px">
+  <div style="font-size:32px;font-weight:900;margin-bottom:32px">核心方法论：<span class="c-yellow">三级提问金字塔</span></div>
+  <div class="three-col" style="height:420px">
+    <div style="background:linear-gradient(180deg,rgba(255,107,107,0.08),rgba(255,107,107,0.02));border:1px solid rgba(255,107,107,0.2);border-radius:16px;padding:32px;text-align:center;display:flex;flex-direction:column;justify-content:center">
+      <div style="font-size:64px;font-weight:900;color:var(--red);opacity:0.15;margin-bottom:-10px">L1</div>
+      <div style="font-size:24px;font-weight:900;color:var(--red);margin-bottom:16px">普通人</div>
+      <div style="font-size:15px;line-height:2;color:rgba(255,255,255,0.6)">只说 <span class="c-red fw7">"写什么"</span><br>没有受众、没有风格、没有参考<br>AI给你 → 正确的废话</div>
+      <div style="margin-top:20px;padding:10px;background:rgba(255,107,107,0.1);border-radius:8px;font-size:13px;color:rgba(255,255,255,0.4)">"帮我写一个XX的文案"</div>
+    </div>
+    <div style="background:linear-gradient(180deg,rgba(112,161,255,0.08),rgba(112,161,255,0.02));border:1px solid rgba(112,161,255,0.2);border-radius:16px;padding:32px;text-align:center;display:flex;flex-direction:column;justify-content:center">
+      <div style="font-size:64px;font-weight:900;color:var(--blue);opacity:0.15;margin-bottom:-10px">L2</div>
+      <div style="font-size:24px;font-weight:900;color:var(--blue);margin-bottom:16px">高手</div>
+      <div style="font-size:15px;line-height:2;color:rgba(255,255,255,0.6)">说清 <span class="c-blue fw7">"给谁写、什么风格"</span><br>给角色、给受众、给平台<br>AI给你 → 像样的文案</div>
+      <div style="margin-top:20px;padding:10px;background:rgba(112,161,255,0.1);border-radius:8px;font-size:13px;color:rgba(255,255,255,0.4)">"你是XX，给XX人群写XX风格的文案"</div>
+    </div>
+    <div style="background:linear-gradient(180deg,rgba(255,210,0,0.08),rgba(255,210,0,0.02));border:1px solid rgba(255,210,0,0.2);border-radius:16px;padding:32px;text-align:center;display:flex;flex-direction:column;justify-content:center">
+      <div style="font-size:64px;font-weight:900;color:var(--yellow);opacity:0.15;margin-bottom:-10px">L3</div>
+      <div style="font-size:24px;font-weight:900;color:var(--yellow);margin-bottom:16px">顶级高手</div>
+      <div style="font-size:15px;line-height:2;color:rgba(255,255,255,0.6)">设计 <span class="c-yellow fw7">"怎么写、写到什么程度"</span><br>给爆款参考、给情绪节奏、给禁用词<br>AI给你 → 可直接发布的爆款</div>
+      <div style="margin-top:20px;padding:10px;background:rgba(255,210,0,0.1);border-radius:8px;font-size:13px;color:rgba(255,255,255,0.4)">"参照XX的文风，钩子用反差，情绪走共鸣…"</div>
+    </div>
+  </div>
+  <div class="formula-bar" style="margin-top:24px">
+    <div class="f-main">信息密度越高 → 文案越精准 → 离爆款越近</div>
+  </div>
+</div>
+
+<!-- ================================================================ -->
+<!-- ====================== 第1课：餐饮 ============================ -->
+<!-- ================================================================ -->
+<div class="slide" style="background:linear-gradient(135deg,#1a0a0a,#2d1515,#1a1a2e);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center">
+  <div style="position:absolute;font-size:180px;font-weight:900;color:rgba(255,107,107,0.04);top:50%;left:50%;transform:translate(-50%,-55%)">01</div>
+  <div class="progress-track" style="margin-bottom:28px"><div class="progress-dot active"></div><div class="progress-dot"></div><div class="progress-dot"></div><div class="progress-dot"></div><div class="progress-dot"></div><div class="progress-dot"></div><div class="progress-dot"></div><div class="progress-dot"></div><div class="progress-dot"></div><div class="progress-dot"></div></div>
+  <div class="badge" style="background:rgba(255,107,107,0.15);color:var(--red);margin-bottom:20px">第一课 · 餐饮行业</div>
+  <div style="font-size:48px;font-weight:900;color:var(--red)">文案基础：钩子 + 口播 + 引导</div>
+  <div style="font-size:20px;color:rgba(255,255,255,0.4);margin-top:16px">从一碗面开始，学会让AI写出"让人看饿"的文字</div>
+  <div style="margin-top:40px;font-size:14px;color:rgba(255,255,255,0.2)">本课核心：爆款文案5要素 · 钩子写法 · 口播节奏 · 引导话术</div>
+</div>
+
+<!-- 第1课核心知识 -->
+<div class="slide bg-dark" style="padding:50px 60px">
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:28px">
+    <div style="width:10px;height:10px;border-radius:50%;background:var(--red)"></div>
+    <div style="font-size:28px;font-weight:900">一条爆款短视频文案，由什么组成？</div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:24px">
+    <div class="card" style="text-align:center;padding:20px 14px;border:1px solid rgba(255,107,107,0.2)"><div style="font-size:36px;margin-bottom:6px;color:var(--red)">01</div><div style="font-size:16px;font-weight:700;color:var(--red)">钩子</div><div style="font-size:12px;color:rgba(255,255,255,0.5);margin-top:6px">前3秒<br>让人停下滑动</div></div>
+    <div class="card" style="text-align:center;padding:20px 14px;border:1px solid rgba(255,165,2,0.2)"><div style="font-size:36px;margin-bottom:6px;color:var(--orange)">02</div><div style="font-size:16px;font-weight:700;color:var(--orange)">口播词</div><div style="font-size:12px;color:rgba(255,255,255,0.5);margin-top:6px">对着镜头说的<br>每一句话</div></div>
+    <div class="card" style="text-align:center;padding:20px 14px;border:1px solid rgba(255,210,0,0.2)"><div style="font-size:36px;margin-bottom:6px;color:var(--yellow)">03</div><div style="font-size:16px;font-weight:700;color:var(--yellow)">字幕文案</div><div style="font-size:12px;color:rgba(255,255,255,0.5);margin-top:6px">屏幕上的<br>关键文字强调</div></div>
+    <div class="card" style="text-align:center;padding:20px 14px;border:1px solid rgba(123,237,159,0.2)"><div style="font-size:36px;margin-bottom:6px;color:var(--green)">04</div><div style="font-size:16px;font-weight:700;color:var(--green)">标题</div><div style="font-size:12px;color:rgba(255,255,255,0.5);margin-top:6px">让人从首页<br>点进来的那行字</div></div>
+    <div class="card" style="text-align:center;padding:20px 14px;border:1px solid rgba(112,161,255,0.2)"><div style="font-size:36px;margin-bottom:6px;color:var(--blue)">05</div><div style="font-size:16px;font-weight:700;color:var(--blue)">引导语</div><div style="font-size:12px;color:rgba(255,255,255,0.5);margin-top:6px">让人关注/下单<br>/评论的收尾</div></div>
+  </div>
+  <div class="card card-accent" style="border-color:var(--red);margin-bottom:20px">
+    <div style="font-size:15px;line-height:1.8;color:rgba(255,255,255,0.7)">
+      <span class="c-red fw7">"帮我写一个面馆的短视频文案"</span> —— 这句话让AI完全不知道你要上面5个里的哪个，也不知道面馆什么特色、给谁看、在什么平台。所以只能给你"万能废话"。
+    </div>
+  </div>
+  <div class="formula-bar">
+    <div class="f-main">有效提问 = 告诉AI：你是谁 + 我是谁 + 写给谁 + 参照谁 + 不能写什么 + 交付什么</div>
+  </div>
+</div>
+
+<!-- 第1课三级对比 -->
+<div class="slide bg-dark" style="padding:28px 36px">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+    <div style="width:8px;height:8px;border-radius:50%;background:var(--red)"></div>
+    <div style="font-size:24px;font-weight:700">三级提问对比 <span style="font-size:14px;color:rgba(255,255,255,0.3);margin-left:8px">餐饮 · 社区牛肉面馆</span></div>
+  </div>
+  <div class="cmp-grid" style="height:calc(100% - 56px)">
+    <div class="cmp-box cmp-L1">
+      <div class="tag">普通人提问</div>
+      <div class="txt">帮我写一个面馆的短视频文案。</div>
+    </div>
+    <div class="cmp-box cmp-L2">
+      <div class="tag">高手提问</div>
+      <div class="txt">你是餐饮行业的文案高手。
+
+我开了一家社区牛肉面馆，主打现熬骨汤，客单价18元，目标客户是周边上班族。
+
+帮我写一条30秒的抖音短视频文案，要包含开头钩子、口播词和结尾引导，目的是引流到店，风格接地气、有食欲感。</div>
+    </div>
+    <div class="cmp-box cmp-L3">
+      <div class="tag">顶级高手提问</div>
+      <div class="txt">你是写过"张亮麻辣烫"等品牌爆款文案的餐饮文案操盘手。
+
+【我的店】社区牛肉面馆，武汉光谷，开业3月，月流水8万，主打12小时慢熬牛骨汤，招牌红烧牛肉面18元，复购率60%。
+
+【目标】抖音30秒文案，3天内带来50组到店。
+
+【文案结构】参考爆款"反差钩子→价值描述→价格锚点→行动引导"四段式。
+
+【风格要求】口播用武汉方言+普通话混搭，语气像老板本人在说话。每句话不超过15个字。要有烟火气，不要广告腔。
+
+【必须包含】"12小时慢熬"这个核心卖点；一句让人口水直流的食欲描写；结尾引导"评论区扣1领5元券"。
+
+【禁止】不要用"美味""好吃""正宗"这类没信息量的词。
+
+请输出：①开头钩子（3秒内让人停住）②完整口播词 ③3条字幕文案 ④3个标题选项 ⑤2条评论区预埋话术。</div>
+    </div>
+  </div>
+</div>
+
+<!-- 第1课AI输出对比 -->
+<div class="slide bg-dark" style="padding:32px 44px">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px">
+    <div style="width:8px;height:8px;border-radius:50%;background:var(--yellow)"></div>
+    <div style="font-size:24px;font-weight:700">震撼时刻：<span class="c-yellow">看看AI分别写出了什么文案</span></div>
+  </div>
+  <div class="output-grid" style="height:calc(100% - 80px)">
+    <div class="output-box out-bad">
+      <div class="out-label c-red">普通人提问 → AI写的文案</div>
+      <div class="out-content">
+        "面馆美食推荐！一碗面温暖你的胃。我们的面条劲道爽滑，汤头鲜美浓郁，每一口都是满满的幸福感。快来尝尝吧！地址在评论区~"
+      </div>
+      <div class="out-verdict c-red">
+        ❌ 全是"好吃""鲜美"，没有一句有画面感<br>
+        ❌ 没有钩子，前3秒留不住人<br>
+        ❌ 换任何面馆都能用=哪家都不能用<br>
+        ❌ 没有转化引导<br>
+        <div style="margin-top:8px"><div class="score-bar"><span class="bar-label">爆款潜力</span><div class="bar-bg"><div class="bar-fill" style="width:10%;background:var(--red)"></div></div><span class="bar-val c-red">1/10</span></div></div>
+      </div>
+    </div>
+    <div class="output-box out-ok">
+      <div class="out-label c-blue">高手提问 → AI写的文案</div>
+      <div class="out-content">
+        <strong>钩子：</strong>"这碗面，回头客比新客多。"<br><br>
+        <strong>口播：</strong>"清晨五点这锅骨汤就开始熬了，一碗18块，用料比外面38的还实在。住附近的朋友，中午来碗面？"<br><br>
+        <strong>引导：</strong>"地址在评论区！"
+      </div>
+      <div class="out-verdict c-blue">
+        ✅ 有钩子，有价格锚点<br>
+        ✅ 接地气<br>
+        ❌ 钩子不够有冲突和反差<br>
+        ❌ 缺字幕文案和评论预埋<br>
+        <div style="margin-top:8px"><div class="score-bar"><span class="bar-label">爆款潜力</span><div class="bar-bg"><div class="bar-fill" style="width:55%;background:var(--blue)"></div></div><span class="bar-val c-blue">5.5/10</span></div></div>
+      </div>
+    </div>
+    <div class="output-box out-great">
+      <div class="out-label c-yellow">顶级高手提问 → AI写的文案</div>
+      <div class="out-content" style="font-size:12px;line-height:1.55">
+        <strong>钩子：</strong>"开了三年宝马，现在每天凌晨四点起来熬骨汤。"<br><br>
+        <strong>口播词：</strong>"12个小时慢熬，牛骨棒子要熬到一捏就碎。这一碗连汤底都是白的——不是加了奶，是胶原蛋白熬出来的。外面一碗牛肉面卖38，我这碗18。搞么事嘞，来碗面撒！"<br><br>
+        <strong>字幕：</strong>①不加一滴味精 全靠骨头吊鲜 ②18元=大块牛肉+现熬骨汤+手工面 ③放弃高薪回来开面馆<br><br>
+        <strong>标题：</strong>①开了三年宝马的人来光谷卖18块的面 ②在武汉吃到一碗熬了12小时的面 ③光谷这家面馆复购率60%的秘密<br><br>
+        <strong>评论预埋：</strong>"汤真的是白色的吗？" / "18块能吃到这种品质？"
+      </div>
+      <div class="out-verdict c-yellow" style="font-size:11px">
+        ✅ 反差钩子 ✅ 有方言 ✅ 食欲描写具体 ✅ 五件套齐全
+        <div style="margin-top:4px"><div class="score-bar"><span class="bar-label">爆款潜力</span><div class="bar-bg"><div class="bar-fill" style="width:92%;background:var(--yellow)"></div></div><span class="bar-val c-yellow">9.2/10</span></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 第1课拆解 -->
+<div class="slide bg-dark" style="padding:44px 56px">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:24px">
+    <div style="width:8px;height:8px;border-radius:50%;background:var(--red)"></div>
+    <div style="font-size:28px;font-weight:700">为什么顶级提问能写出爆款文案？</div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:20px">
+    <div class="card" style="padding:18px"><div style="font-size:13px;font-weight:700;color:var(--red);margin-bottom:8px">1. 角色精准</div><div style="font-size:13px;line-height:1.7;color:rgba(255,255,255,0.6)">不是"文案高手"→而是<span class="c-yellow">"写过张亮爆款文案的人"</span>。AI会用不同水平的知识来写</div></div>
+    <div class="card" style="padding:18px"><div style="font-size:13px;font-weight:700;color:var(--orange);margin-bottom:8px">2. 卖点具体</div><div style="font-size:13px;line-height:1.7;color:rgba(255,255,255,0.6)">不是"汤好喝"→而是<span class="c-yellow">"12小时慢熬，骨头捏就碎"</span>。具体细节才有画面感</div></div>
+    <div class="card" style="padding:18px"><div style="font-size:13px;font-weight:700;color:var(--yellow);margin-bottom:8px">3. 文案结构</div><div style="font-size:13px;line-height:1.7;color:rgba(255,255,255,0.6)">给了<span class="c-yellow">"反差钩子→价值→价格→行动"</span>四段式，AI不用猜怎么写</div></div>
+    <div class="card" style="padding:18px"><div style="font-size:13px;font-weight:700;color:var(--green);margin-bottom:8px">4. 风格约束</div><div style="font-size:13px;line-height:1.7;color:rgba(255,255,255,0.6)">武汉方言+每句15字内+烟火气。<span class="c-yellow">有限制才有风格</span>，没限制只有平庸</div></div>
+    <div class="card" style="padding:18px"><div style="font-size:13px;font-weight:700;color:var(--blue);margin-bottom:8px">5. 禁用词</div><div style="font-size:13px;line-height:1.7;color:rgba(255,255,255,0.6)">禁止"美味好吃正宗"。<span class="c-yellow">封死废话出口</span>，AI被迫写出有信息量的文字</div></div>
+    <div class="card" style="padding:18px"><div style="font-size:13px;font-weight:700;color:var(--purple);margin-bottom:8px">6. 交付清单</div><div style="font-size:13px;line-height:1.7;color:rgba(255,255,255,0.6)">要求5件套：钩子+口播+字幕+标题+评论。<span class="c-yellow">一次全要，拿到就发</span></div></div>
+  </div>
+  <div class="formula-bar">
+    <div class="f-main" style="font-size:22px">第1课公式：角色 + 卖点 + 结构 + 风格 + 禁区 + 交付清单 = 爆款文案</div>
+  </div>
+</div>
+
+<!-- 第1课踩坑 -->
+<div class="slide bg-dark" style="padding:44px 56px">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:24px">
+    <div style="width:8px;height:8px;border-radius:50%;background:var(--red)"></div>
+    <div style="font-size:28px;font-weight:700">常见踩坑 · 小白最容易犯的<span class="c-red">4个错误</span></div>
+  </div>
+  <div class="two-col">
+    <div>
+      <div class="pitfall-card">
+        <div class="pit-wrong">错误1："帮我写一个好的文案"</div>
+        <div class="pit-right">正确："帮我写一条30秒抖音口播词，包含钩子和引导语"</div>
+        <div class="pit-why">原因："好的"对AI没有定义。你要说清楚要"什么格式"的文案</div>
+      </div>
+      <div class="pitfall-card">
+        <div class="pit-wrong">错误2：只说"我家面很好吃，价格实惠"</div>
+        <div class="pit-right">正确："客单价18元，12小时慢熬骨汤，复购率60%"</div>
+        <div class="pit-why">原因："好吃""实惠"是感觉，AI需要事实。有细节才能写出有画面感的文案</div>
+      </div>
+    </div>
+    <div>
+      <div class="pitfall-card">
+        <div class="pit-wrong">错误3：不告诉AI"不能写什么"</div>
+        <div class="pit-right">正确："禁止用美味、好吃、正宗、不容错过这类废话"</div>
+        <div class="pit-why">原因：不给禁用词，AI默认用最安全的万能词汇。封死废话，才能逼出好文案</div>
+      </div>
+      <div class="pitfall-card">
+        <div class="pit-wrong">错误4：拿到第一版就用</div>
+        <div class="pit-right">正确：追问"钩子不够有冲突，换成反差型"或"口播太长，压缩到5句以内"</div>
+        <div class="pit-why">原因：顶级文案 = 初稿 + 追问3次。AI的第一版是草稿，追问才出精品</div>
+      </div>
+    </div>
+  </div>
+  <div class="practice-box" style="margin-top:16px">
+    <div style="font-size:16px;font-weight:700;color:var(--yellow);margin-bottom:8px">课后练习</div>
+    <div style="font-size:14px;color:rgba(255,255,255,0.6)">用6要素框架为你熟悉的一家餐饮店写一段顶级提问，要求AI输出完整5件套（钩子+口播+字幕+标题+评论）。</div>
+  </div>
+</div>
+
+
+<!-- ================================================================ -->
+<!-- ====================== 第2课：美妆 ============================ -->
+<!-- ================================================================ -->
+<div class="slide" style="background:linear-gradient(135deg,#1a120a,#2d1f10,#1a1a2e);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center">
+  <div style="position:absolute;font-size:180px;font-weight:900;color:rgba(255,165,2,0.04);top:50%;left:50%;transform:translate(-50%,-55%)">02</div>
+  <div class="progress-track" style="margin-bottom:28px"><div class="progress-dot done"></div><div class="progress-dot active"></div><div class="progress-dot"></div><div class="progress-dot"></div><div class="progress-dot"></div><div class="progress-dot"></div><div class="progress-dot"></div><div class="progress-dot"></div><div class="progress-dot"></div><div class="progress-dot"></div></div>
+  <div class="badge" style="background:rgba(255,165,2,0.15);color:var(--orange)">第二课 · 美妆行业</div>
+  <div style="font-size:48px;font-weight:900;color:var(--orange);margin-top:20px">情绪文案：让AI写出"种草感"</div>
+  <div style="font-size:20px;color:rgba(255,255,255,0.4);margin-top:16px">学会给AI"喂情绪"，让每一句话都自带传播力</div>
+  <div style="margin-top:40px;font-size:14px;color:rgba(255,255,255,0.2)">本课新技能：受众画像 · 情绪主线 · 负面约束 · 爆款文案结构拆解</div>
+</div>
+
+<!-- 第2课核心 -->
+<div class="slide bg-dark" style="padding:50px 60px">
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:28px">
+    <div style="width:10px;height:10px;border-radius:50%;background:var(--orange)"></div>
+    <div style="font-size:28px;font-weight:900">美妆文案的秘密：<span class="c-orange">情绪 > 功能</span></div>
+  </div>
+  <div class="two-col" style="margin-bottom:24px">
+    <div class="card card-accent" style="border-color:var(--red);height:100%">
+      <div style="font-size:17px;font-weight:700;color:var(--red);margin-bottom:14px">没人看的文案</div>
+      <div style="font-size:28px;line-height:1.6;color:rgba(255,255,255,0.4);font-style:italic;padding:20px 0">"这款粉底液持妆12小时，遮瑕力强，不卡粉不脱妆"</div>
+      <div style="font-size:14px;color:var(--red)">→ 产品说明书，没有传播欲望</div>
+    </div>
+    <div class="card card-accent" style="border-color:var(--green);height:100%">
+      <div style="font-size:17px;font-weight:700;color:var(--green);margin-bottom:14px">百万播放的文案</div>
+      <div style="font-size:28px;line-height:1.6;color:rgba(255,255,255,0.8);font-style:italic;padding:20px 0">"约会迟到40分钟，他说你今天皮肤好好"</div>
+      <div style="font-size:14px;color:var(--green)">→ 一句话 = 场景 + 情绪 + 身份认同</div>
+    </div>
+  </div>
+  <div class="formula-bar">
+    <div class="f-main">爆款美妆文案 = 情绪场景 + 身份共鸣 + 使用前后反差</div>
+    <div class="f-sub">教AI：别写产品参数，写"让人想变美的那句话"</div>
+  </div>
+</div>
+
+<!-- 第2课三级对比 -->
+<div class="slide bg-dark" style="padding:28px 36px">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+    <div style="width:8px;height:8px;border-radius:50%;background:var(--orange)"></div>
+    <div style="font-size:24px;font-weight:700">三级提问对比 <span style="font-size:14px;color:rgba(255,255,255,0.3);margin-left:8px">美妆 · 平价粉底液</span></div>
+  </div>
+  <div class="cmp-grid" style="height:calc(100% - 56px)">
+    <div class="cmp-box cmp-L1"><div class="tag">普通人提问</div><div class="txt">帮我写一个粉底液的种草文案。</div></div>
+    <div class="cmp-box cmp-L2"><div class="tag">高手提问</div><div class="txt">你是小红书美妆博主，粉丝5万。
+
+帮我写一条种草文案，推荐一款79元的平价粉底液，目标受众是大学生和刚工作的女生。
+
+要求：
+- 风格真实不做作
+- 要体现使用前后反差
+- 结尾引导购买</div></div>
+    <div class="cmp-box cmp-L3"><div class="tag">顶级高手提问</div><div class="txt">你是操盘过完美日记、花西子小红书爆款文案的美妆内容策划总监。
+
+【产品】花知晓柔焦粉底液，79元/30ml，"学生党平替"，遮瑕中上，妆感自然。
+【目标】小红书短视频文案，互动率8%+，带动天猫搜索。
+【受众画像】18-24岁女生，月消费3000以下，化妆1年以内，最怕"假面感"。
+【文案结构】参照@程十安的种草文案逻辑：
+"灵魂拷问开头→自嘲拉近距离→使用体验→多场景验证→价格惊喜→评论引导"
+【情绪主线】全程贯穿"穷学生也能拥有好皮肤"的共鸣感。
+【风格约束】说话像在跟闺蜜聊天；每句≤15字；禁止"平替"做标题（审美疲劳）；禁止"姐妹们快冲"等叫卖语气。
+
+请输出：①开头钩子3选1 ②完整口播文案 ③3条字幕金句 ④3个标题 ⑤评论区预埋3条。</div></div>
+  </div>
+</div>
+
+<!-- 第2课AI输出对比 -->
+<div class="slide bg-dark" style="padding:32px 44px">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px">
+    <div style="width:8px;height:8px;border-radius:50%;background:var(--yellow)"></div>
+    <div style="font-size:24px;font-weight:700">震撼时刻：<span class="c-yellow">同一个产品，三种文案</span></div>
+  </div>
+  <div class="output-grid" style="height:calc(100% - 80px)">
+    <div class="output-box out-bad">
+      <div class="out-label c-red">普通人 → AI写的</div>
+      <div class="out-content">"姐妹们！今天安利一款超好用的粉底液！遮瑕力满分，持妆一整天，关键才79块！学生党必入！赶紧冲冲冲！"</div>
+      <div class="out-verdict c-red">❌ 广告腔 ❌ 没场景 ❌ "满分""赶紧冲"已是废话<br><div style="margin-top:6px"><div class="score-bar"><span class="bar-label">种草力</span><div class="bar-bg"><div class="bar-fill" style="width:10%;background:var(--red)"></div></div><span class="bar-val c-red">1/10</span></div></div></div>
+    </div>
+    <div class="output-box out-ok">
+      <div class="out-label c-blue">高手 → AI写的</div>
+      <div class="out-content">"我的皮肤其实很差…今天试一下这个79块的粉底液。上完妆效果还可以，遮住了痘印。而且一整天都没怎么脱。链接在购物车！"</div>
+      <div class="out-verdict c-blue">✅ 有真实感 ✅ 有前后反差<br>❌ 平淡无高潮 ❌ 缺少共鸣金句<br><div style="margin-top:6px"><div class="score-bar"><span class="bar-label">种草力</span><div class="bar-bg"><div class="bar-fill" style="width:50%;background:var(--blue)"></div></div><span class="bar-val c-blue">5/10</span></div></div></div>
+    </div>
+    <div class="output-box out-great">
+      <div class="out-label c-yellow">顶级高手 → AI写的</div>
+      <div class="out-content" style="font-size:12px;line-height:1.6">
+        <strong>钩子：</strong>"全寝室都问我最近涂了什么。"<br>
+        <strong>口播：</strong>"其实我犹豫了一周——79块的粉底液能好用吗？上脸那一刻我就知道，这钱花对了。上课8小时，脸还是哑光的。吃完火锅补个粉，室友说'你今天皮肤也太好了吧'。用了两周，我妈打视频说我是不是谈恋爱了。"<br>
+        <strong>字幕金句：</strong>①79块买到的不是粉底液是自信 ②熬了8小时的夜它还在 ③我妈以为我谈恋爱了<br>
+        <strong>标题：</strong>①全寝室都问我涂了什么 ②79块的粉底液凭什么让我回购3次 ③化妆新手闭眼入的第一瓶底妆<br>
+        <strong>评论预埋：</strong>"油皮能用吗" / "真的不卡粉？" / "色号怎么选啊"
+      </div>
+      <div class="out-verdict c-yellow" style="font-size:11px">✅ 闺蜜语气 ✅ 场景验证 ✅ 共鸣金句 ✅ 五件套齐全<br><div style="margin-top:4px"><div class="score-bar"><span class="bar-label">种草力</span><div class="bar-bg"><div class="bar-fill" style="width:93%;background:var(--yellow)"></div></div><span class="bar-val c-yellow">9.3/10</span></div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- 第2课拆解+踩坑 -->
+<div class="slide bg-dark" style="padding:44px 56px">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:24px">
+    <div style="width:8px;height:8px;border-radius:50%;background:var(--orange)"></div>
+    <div style="font-size:28px;font-weight:700">新技能 + 常见踩坑</div>
+  </div>
+  <div class="two-col">
+    <div>
+      <div class="card card-accent" style="border-color:var(--orange);margin-bottom:14px">
+        <div style="font-size:16px;font-weight:700;color:var(--orange);margin-bottom:12px">本课3个新武器</div>
+        <div style="font-size:14px;line-height:2">
+          <span class="c-orange fw7">① 受众画像</span> —— "18-24岁、月消费3000以下、最怕假面感"比"年轻女生"精准10倍<br>
+          <span class="c-orange fw7">② 情绪主线</span> —— 告诉AI"全程写出被理解的感觉"，比"要有感情"有效100倍<br>
+          <span class="c-orange fw7">③ 禁用词</span> —— "禁止姐妹们快冲"封死广告腔，逼AI写人话
+        </div>
+      </div>
+      <div class="card card-accent" style="border-color:var(--yellow)">
+        <div style="font-size:16px;font-weight:700;color:var(--yellow);margin-bottom:8px">爆款文案的正确喂法</div>
+        <div style="font-size:14px;line-height:1.9;color:rgba(255,255,255,0.7)">❌ "照着这个视频写文案"<br>✅ 先拆解<span class="c-yellow">文字为什么火</span> → 提炼<span class="c-yellow">结构模型</span> → 喂给AI</div>
+      </div>
+    </div>
+    <div>
+      <div class="pitfall-card">
+        <div class="pit-wrong">"写一个有感染力的美妆文案"</div>
+        <div class="pit-right">"情绪主线：制造'穷学生也能好皮肤'的共鸣"</div>
+        <div class="pit-why">"有感染力"是废话。给AI具体的情绪指令</div>
+      </div>
+      <div class="pitfall-card">
+        <div class="pit-wrong">"参考这个爆款视频文案：[链接]"</div>
+        <div class="pit-right">"参照@程十安文案逻辑：灵魂拷问→自嘲→体验→验证→引导"</div>
+        <div class="pit-why">AI看不了链接。先自己拆解结构再喂给AI</div>
+      </div>
+      <div class="practice-box" style="margin-top:14px">
+        <div style="font-size:14px;font-weight:700;color:var(--yellow);margin-bottom:6px">课后练习</div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.5)">找一条种草到位的美妆短视频，拆解它的文案结构，用顶级提问法为另一个产品写出同样结构的文案。</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================ -->
+<!-- ===== 第3-9课（每课：标题+对比+拆解 共3页）==================== -->
+<!-- ================================================================ -->
+
+<!-- 第3课：教育 -->
+<div class="slide" style="background:linear-gradient(135deg,#1a1508,#2d2610,#1a1a2e);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center">
+  <div style="position:absolute;font-size:180px;font-weight:900;color:rgba(255,210,0,0.04);top:50%;left:50%;transform:translate(-50%,-55%)">03</div>
+  <div class="progress-track" style="margin-bottom:28px"><div class="progress-dot done"></div><div class="progress-dot done"></div><div class="progress-dot active"></div><div class="progress-dot"></div><div class="progress-dot"></div><div class="progress-dot"></div><div class="progress-dot"></div><div class="progress-dot"></div><div class="progress-dot"></div><div class="progress-dot"></div></div>
+  <div class="badge" style="background:rgba(255,210,0,0.15);color:var(--yellow)">第三课 · 教育培训</div>
+  <div style="font-size:48px;font-weight:900;color:var(--yellow);margin-top:20px">焦虑文案：精准戳中痛点</div>
+  <div style="font-size:20px;color:rgba(255,255,255,0.4);margin-top:16px">新技能：受众心理建模 · 情绪路线 · 评论预埋 · 合规红线</div>
+</div>
+
+<div class="slide bg-dark" style="padding:28px 36px">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px"><div style="width:8px;height:8px;border-radius:50%;background:var(--yellow)"></div><div style="font-size:24px;font-weight:700">三级提问对比 <span style="font-size:14px;color:rgba(255,255,255,0.3)">教育 · 少儿编程</span></div></div>
+  <div class="cmp-grid" style="height:calc(100% - 56px)">
+    <div class="cmp-box cmp-L1"><div class="tag">普通人提问</div><div class="txt">帮我写一个少儿编程的招生文案。</div></div>
+    <div class="cmp-box cmp-L2"><div class="tag">高手提问</div><div class="txt">你是教育行业的文案专家。
+
+我是一家少儿编程机构，主做6-12岁scratch和Python课程，杭州3个校区。
+
+帮我写一条40秒抖音短视频文案，目标获取家长私信，风格要制造紧迫感但不过度焦虑。</div></div>
+    <div class="cmp-box cmp-L3"><div class="tag">顶级高手提问</div><div class="txt">你是帮学而思、编程猫写过百万播放获客文案的教育文案专家。
+
+【机构】杭州"小码王"少儿编程，3校区，6-12岁，客单价8000/年，体验→正价转化率30%。
+【目标】抖音40秒文案，单条200+私信线索，暑假班招生。
+【受众心理】杭州互联网员工家长，核心焦虑："别人家孩子都在学，我家落后了"。决策障碍："编程到底有没有用？"
+【文案结构】"数据冲击→反转认知→真实案例→限时引导"
+【情绪路线】开头制造信息差焦虑→中间建立"原来不难"的信心→结尾用"限额"制造紧迫
+【约束】数据必须可查证；不承诺效果；不贬低竞对；必须提及真实学员成果。
+【禁用词】"赢在起跑线""不能输""必须学"等过度焦虑词。
+
+输出：①钩子3选1 ②完整口播文案 ③字幕金句3条 ④标题3选1 ⑤评论区预埋3条。</div></div>
+  </div>
+</div>
+
+<div class="slide bg-dark" style="padding:44px 56px">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:24px"><div style="width:8px;height:8px;border-radius:50%;background:var(--yellow)"></div><div style="font-size:28px;font-weight:700">本课核心 + <span class="c-red">教育行业红线</span></div></div>
+  <div class="two-col">
+    <div>
+      <div class="card card-accent" style="border-color:var(--yellow)">
+        <div style="font-size:16px;font-weight:700;color:var(--yellow);margin-bottom:12px">3个新武器</div>
+        <div style="font-size:14px;line-height:2.2">
+          <span class="c-yellow fw7">① 心理画像</span> —— 不只是年龄性别，而是"核心焦虑+决策障碍"，AI才能写出戳心的话<br>
+          <span class="c-yellow fw7">② 情绪路线</span> —— 焦虑→信心→紧迫，提前设计每段文案的情绪走向<br>
+          <span class="c-yellow fw7">③ 禁用词</span> —— 封死"赢在起跑线"，逼AI写出有信息量的焦虑感
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="card" style="border:1px solid rgba(255,107,107,0.3);background:rgba(255,107,107,0.04)">
+        <div style="font-size:16px;font-weight:700;color:var(--red);margin-bottom:12px">教育行业红线（必须写进约束）</div>
+        <div style="font-size:14px;line-height:2.2;color:rgba(255,255,255,0.7)">
+          <span class="c-red">❌</span> 不能虚构数据（"99%孩子提分"）<br>
+          <span class="c-red">❌</span> 不能承诺效果（"保证进名校"）<br>
+          <span class="c-red">❌</span> 不能贬低竞对<br>
+          <span class="c-red">❌</span> 不能制造过度焦虑<br><br>
+          <span class="c-yellow fw7">你给AI画的红线 = 保护你自己</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="practice-box" style="margin-top:16px"><div style="font-size:14px;font-weight:700;color:var(--yellow);margin-bottom:6px">课后练习</div><div style="font-size:13px;color:rgba(255,255,255,0.5)">为任意教育产品写顶级提问，必须包含"受众心理画像""情绪路线""禁用词"。</div></div>
+</div>
+
+<!-- 第4课：房产 -->
+<div class="slide" style="background:linear-gradient(135deg,#0a1a0f,#152d1a,#1a1a2e);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center">
+  <div style="position:absolute;font-size:180px;font-weight:900;color:rgba(123,237,159,0.04);top:50%;left:50%;transform:translate(-50%,-55%)">04</div>
+  <div class="progress-track" style="margin-bottom:28px"><div class="progress-dot done"></div><div class="progress-dot done"></div><div class="progress-dot done"></div><div class="progress-dot active"></div><div class="progress-dot"></div><div class="progress-dot"></div><div class="progress-dot"></div><div class="progress-dot"></div><div class="progress-dot"></div><div class="progress-dot"></div></div>
+  <div class="badge" style="background:rgba(123,237,159,0.15);color:var(--green)">第四课 · 房产行业</div>
+  <div style="font-size:48px;font-weight:900;color:var(--green);margin-top:20px">数据文案：用数字说服人</div>
+  <div style="font-size:20px;color:rgba(255,255,255,0.4);margin-top:16px">新技能：数据喂养 · 算账型文案 · 反向信任（写不适合人群）</div>
+</div>
+
+<div class="slide bg-dark" style="padding:28px 36px">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px"><div style="width:8px;height:8px;border-radius:50%;background:var(--green)"></div><div style="font-size:24px;font-weight:700">三级提问对比 <span style="font-size:14px;color:rgba(255,255,255,0.3)">房产 · 新盘推广</span></div></div>
+  <div class="cmp-grid" style="height:calc(100% - 56px)">
+    <div class="cmp-box cmp-L1"><div class="tag">普通人提问</div><div class="txt">帮我写一个卖房子的短视频文案。</div></div>
+    <div class="cmp-box cmp-L2"><div class="tag">高手提问</div><div class="txt">你是房产自媒体文案专家。
+
+我是成都天府新区一个新楼盘的置业顾问，均价1.8万/㎡，主力户型89-120㎡。
+
+帮我写一条抖音短视频文案，目标让刚需客户私信，风格专业但不高冷。</div></div>
+    <div class="cmp-box cmp-L3"><div class="tag">顶级高手提问</div><div class="txt">你是帮碧桂园、万科写过500万播放获客文案的房产文案专家。
+
+【楼盘】成都天府新区，均价1.8万/㎡，89㎡三房总价160万，首付48万，月供4800，自带12年制学校。
+【受众】28-35岁，现住主城老破小60-70㎡，核心需求："同样月供，从老破小换到大三房+好学校"。
+【文案结构】算账型："扎心提问→帮你算一笔账→配套亮点→限时优惠→评论引导"
+【风格】像朋友在帮你分析，不像销售在卖房。
+【约束】价格标注"仅供参考"；不承诺升值；写一段"不适合人群"增加信任。
+【禁用词】"不容错过""绝版""升值潜力巨大"。
+
+输出：①钩子（扎心提问型）②完整口播文案 ③字幕金句3条 ④标题3选1 ⑤评论预埋 ⑥置顶评论。</div></div>
+  </div>
+</div>
+
+<div class="slide bg-dark" style="padding:44px 56px">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:24px"><div style="width:8px;height:8px;border-radius:50%;background:var(--green)"></div><div style="font-size:28px;font-weight:700">本课核心：<span class="c-green">数据文案3板斧</span></div></div>
+  <div class="three-col">
+    <div class="card card-accent" style="border-color:var(--green)">
+      <div style="font-size:18px;font-weight:700;color:var(--green);margin-bottom:12px">① 数据替代形容词</div>
+      <div style="font-size:14px;line-height:1.8;color:rgba(255,255,255,0.7)"><span class="c-red" style="text-decoration:line-through">"性价比高"</span><br>→ <span class="c-green">"89㎡总价160万，月供4800"</span><br><br>给AI具体数字，它才能写出有说服力的文案。没数据=让AI编数据。</div>
+    </div>
+    <div class="card card-accent" style="border-color:var(--green)">
+      <div style="font-size:18px;font-weight:700;color:var(--green);margin-bottom:12px">② 算账型文案</div>
+      <div style="font-size:14px;line-height:1.8;color:rgba(255,255,255,0.7)">告诉AI"帮观众算一笔账"——这比"写一段有说服力的文案"精准100倍。<br><br>算账=自动产生对比=自动产生冲击力</div>
+    </div>
+    <div class="card card-accent" style="border-color:var(--green)">
+      <div style="font-size:18px;font-weight:700;color:var(--green);margin-bottom:12px">③ 反向信任</div>
+      <div style="font-size:14px;line-height:1.8;color:rgba(255,255,255,0.7)">要求AI写"不适合人群"——<br>"如果你预算100万以下，这个盘不适合你"<br><br>这种真诚<span class="c-green fw7">反而提高信任度</span></div>
+    </div>
+  </div>
+  <div class="practice-box" style="margin-top:20px"><div style="font-size:14px;font-weight:700;color:var(--yellow);margin-bottom:6px">课后练习</div><div style="font-size:13px;color:rgba(255,255,255,0.5)">选一个楼盘/二手房，收集5个关键数据点，用"算账型"文案结构写顶级提问。</div></div>
+</div>
+
+<!-- 第5课：健身 -->
+<div class="slide" style="background:linear-gradient(135deg,#0a0f1a,#151e2d,#1a1a2e);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center">
+  <div style="position:absolute;font-size:180px;font-weight:900;color:rgba(112,161,255,0.04);top:50%;left:50%;transform:translate(-50%,-55%)">05</div>
+  <div class="progress-track" style="margin-bottom:28px"><div class="progress-dot done"></div><div class="progress-dot done"></div><div class="progress-dot done"></div><div class="progress-dot done"></div><div class="progress-dot active"></div><div class="progress-dot"></div><div class="progress-dot"></div><div class="progress-dot"></div><div class="progress-dot"></div><div class="progress-dot"></div></div>
+  <div class="badge" style="background:rgba(112,161,255,0.15);color:var(--blue)">第五课 · 健身行业</div>
+  <div style="font-size:48px;font-weight:900;color:var(--blue);margin-top:20px">IP文案：写出"人设感"</div>
+  <div style="font-size:20px;color:rgba(255,255,255,0.4);margin-top:16px">新技能：IP人设档案 · 调性组合 · 口头禅设计 · 系列化选题</div>
+</div>
+
+<div class="slide bg-dark" style="padding:28px 36px">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px"><div style="width:8px;height:8px;border-radius:50%;background:var(--blue)"></div><div style="font-size:24px;font-weight:700">三级提问对比 <span style="font-size:14px;color:rgba(255,255,255,0.3)">健身 · 私教工作室</span></div></div>
+  <div class="cmp-grid" style="height:calc(100% - 56px)">
+    <div class="cmp-box cmp-L1"><div class="tag">普通人提问</div><div class="txt">帮我写一个健身房的短视频文案。</div></div>
+    <div class="cmp-box cmp-L2"><div class="tag">高手提问</div><div class="txt">你是健身行业的文案专家。
+
+我是私教工作室创始人，专注女性塑形，深圳南山，客单价200元/节。
+
+帮我写一条抖音文案，让目标客户预约体验课，专业但不硬推销。</div></div>
+    <div class="cmp-box cmp-L3"><div class="tag">顶级高手提问</div><div class="txt">你是帮Keep、超级猩猩写过千万传播文案的健身内容操盘手。
+
+【IP背景】我叫阿杰，28岁，前国家队体操运动员，ACE认证私教，深圳南山，专注25-35岁女性体态矫正+塑形，200/节，复购75%。
+【受众】25-35岁深圳女白领，久坐体态差，试过自己练没效果，核心需求："不想变金刚芭比，只想穿衣好看"。
+【IP调性】@帕梅拉专业感 + @刘畊宏亲和力。大白话解释专业知识。口头禅："练不对，不如不练。"
+【文案结构】"常见误区→正确做法→效果展示→体验课引导"
+【约束】口播像在跟朋友聊天；不夸大效果；禁止"甩掉赘肉""暴瘦"等虚假承诺。
+
+输出：①完整口播文案 ②口头禅/金句5句（人设记忆点）③系列选题5条（后续视频方向）④标题3选1。</div></div>
+  </div>
+</div>
+
+<div class="slide bg-dark" style="padding:44px 56px">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:24px"><div style="width:8px;height:8px;border-radius:50%;background:var(--blue)"></div><div style="font-size:28px;font-weight:700">本课核心：<span class="c-blue">IP人设档案</span>（填一次，用一辈子）</div></div>
+  <div class="two-col">
+    <div>
+      <div class="card" style="border:1px solid rgba(112,161,255,0.3);background:rgba(112,161,255,0.04)">
+        <div style="font-size:18px;font-weight:700;color:var(--blue);margin-bottom:16px">IP文案档案模板</div>
+        <div style="font-size:15px;line-height:2.4;color:rgba(255,255,255,0.7)">
+          <span class="c-blue fw7">身份</span>：你是谁、什么经历<br>
+          <span class="c-blue fw7">资质</span>：什么认证、多少年经验<br>
+          <span class="c-blue fw7">语气</span>：像谁+谁的组合（调性参考）<br>
+          <span class="c-blue fw7">口头禅</span>：固定的记忆点金句<br>
+          <span class="c-blue fw7">禁区</span>：绝对不说的话<br>
+          <span class="c-blue fw7">受众</span>：你帮什么人解决什么问题
+        </div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.3);margin-top:8px">每次让AI写文案都带上这份档案，AI就是你的"专属文案"</div>
+      </div>
+    </div>
+    <div>
+      <div class="card card-accent" style="border-color:var(--blue);margin-bottom:14px">
+        <div style="font-size:16px;font-weight:700;color:var(--blue);margin-bottom:10px">本课3个新武器</div>
+        <div style="font-size:14px;line-height:2">
+          <span class="c-blue fw7">① IP注入</span> —— 喂给AI你的经历和性格，它才能写出"只有你能说"的文案<br>
+          <span class="c-blue fw7">② 调性组合</span> —— "A的专业+B的亲和"比"专业又接地气"精确10倍<br>
+          <span class="c-blue fw7">③ 系列化</span> —— 不只要1条文案，还要5条后续选题方向
+        </div>
+      </div>
+      <div class="practice-box"><div style="font-size:14px;font-weight:700;color:var(--yellow);margin-bottom:6px">课后练习</div><div style="font-size:13px;color:rgba(255,255,255,0.5)">为你自己写一份"IP文案档案"，用它让AI生成3条系列视频文案。</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- 第6课：母婴 -->
+<div class="slide" style="background:linear-gradient(135deg,#0f0a1a,#1f152d,#1a1a2e);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center">
+  <div style="position:absolute;font-size:180px;font-weight:900;color:rgba(83,82,237,0.04);top:50%;left:50%;transform:translate(-50%,-55%)">06</div>
+  <div class="progress-track" style="margin-bottom:28px"><div class="progress-dot done"></div><div class="progress-dot done"></div><div class="progress-dot done"></div><div class="progress-dot done"></div><div class="progress-dot done"></div><div class="progress-dot active"></div><div class="progress-dot"></div><div class="progress-dot"></div><div class="progress-dot"></div><div class="progress-dot"></div></div>
+  <div class="badge" style="background:rgba(83,82,237,0.15);color:var(--indigo)">第六课 · 母婴行业</div>
+  <div style="font-size:48px;font-weight:900;color:var(--indigo);margin-top:20px">信任文案：写出"妈妈味"</div>
+  <div style="font-size:20px;color:rgba(255,255,255,0.4);margin-top:16px">新技能：文案体裁切换（日记型vs测评型） · 信任链 · 真实感写法</div>
+</div>
+
+<div class="slide bg-dark" style="padding:28px 36px">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px"><div style="width:8px;height:8px;border-radius:50%;background:var(--indigo)"></div><div style="font-size:24px;font-weight:700">三级提问对比 <span style="font-size:14px;color:rgba(255,255,255,0.3)">母婴 · 婴儿辅食</span></div></div>
+  <div class="cmp-grid" style="height:calc(100% - 56px)">
+    <div class="cmp-box cmp-L1"><div class="tag">普通人提问</div><div class="txt">帮我写一个婴儿辅食的短视频文案。</div></div>
+    <div class="cmp-box cmp-L2"><div class="tag">高手提问</div><div class="txt">你是母婴领域的文案博主。
+
+我做婴儿辅食品牌，主打6-12个月宝宝的有机米粉，59元/盒。
+
+帮我写一条小红书种草文案，让宝妈想下单，风格温柔可信。</div></div>
+    <div class="cmp-box cmp-L3"><div class="tag">顶级高手提问</div><div class="txt">你是在年糕妈妈、丁香妈妈写过爆款带货文案的母婴内容总监。
+
+【产品】"谷小满"有机米粉，59元/盒，6-12月龄，有机认证+零添加+铁含量6mg/100g（国标2倍），复购45%。
+【受众】一线新手妈妈，宝宝5-8月，焦虑"第一口辅食怎么选"。决策逻辑：成分干净>品牌大>价格。最怕：重金属、添加剂、过敏。
+【文案体裁】采用"真实妈妈日记"体裁——第一人称"我家宝宝"，像在朋友圈分享，不像博主测评。
+【文案结构】"焦虑共情→踩坑分享→发现这款→证据展示→引导下单"
+【约束】全程妈妈口吻；不用绝对化用语；必须有"建议咨询儿保医生"。
+【禁用词】"最安全""绝对不过敏""必买"。
+
+输出：①开头钩子 ②完整口播文案 ③字幕金句3条 ④标题3选1 ⑤需要展示的信任证据清单（成分表/检测报告等）。</div></div>
+  </div>
+</div>
+
+<div class="slide bg-dark" style="padding:44px 56px">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:24px"><div style="width:8px;height:8px;border-radius:50%;background:var(--indigo)"></div><div style="font-size:28px;font-weight:700">本课核心：<span class="c-indigo">体裁决定文案灵魂</span></div></div>
+  <div class="two-col">
+    <div>
+      <div class="card card-accent" style="border-color:var(--indigo)">
+        <div style="font-size:18px;font-weight:700;color:var(--indigo);margin-bottom:14px">5种文案体裁（超实用）</div>
+        <div style="font-size:15px;line-height:2.4;color:rgba(255,255,255,0.7)">
+          <span class="c-indigo fw7">日记型</span>：母婴、护肤、家居 → 真实感<br>
+          <span class="c-blue fw7">测评型</span>：3C、家电、美妆 → 专业感<br>
+          <span class="c-yellow fw7">故事型</span>：教育、保险、健身 → 共情感<br>
+          <span class="c-green fw7">算账型</span>：房产、理财、装修 → 理性感<br>
+          <span class="c-orange fw7">叫卖型</span>：餐饮、本地生活 → 烟火气
+        </div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.3);margin-top:8px">提问时指定体裁，文案质量飞跃提升</div>
+      </div>
+    </div>
+    <div>
+      <div class="card card-accent" style="border-color:var(--indigo);margin-bottom:14px">
+        <div style="font-size:16px;font-weight:700;color:var(--indigo);margin-bottom:10px">本课3个新武器</div>
+        <div style="font-size:14px;line-height:2">
+          <span class="c-indigo fw7">① 体裁指定</span> —— "妈妈日记"vs"测评"，一词之差文风天壤之别<br>
+          <span class="c-indigo fw7">② 信任证据链</span> —— 告诉AI按什么顺序堆叠信任证据<br>
+          <span class="c-indigo fw7">③ 真实感写法</span> —— "像朋友圈分享"比"要真实"有用100倍
+        </div>
+      </div>
+      <div class="practice-box"><div style="font-size:14px;font-weight:700;color:var(--yellow);margin-bottom:6px">课后练习</div><div style="font-size:13px;color:rgba(255,255,255,0.5)">同一产品分别用"日记型"和"测评型"写提问，对比AI输出的文案差异。</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- 第7课：服装 -->
+<div class="slide" style="background:linear-gradient(135deg,#12081a,#20152d,#1a1a2e);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center">
+  <div style="position:absolute;font-size:180px;font-weight:900;color:rgba(162,155,254,0.04);top:50%;left:50%;transform:translate(-50%,-55%)">07</div>
+  <div class="progress-track" style="margin-bottom:28px"><div class="progress-dot done"></div><div class="progress-dot done"></div><div class="progress-dot done"></div><div class="progress-dot done"></div><div class="progress-dot done"></div><div class="progress-dot done"></div><div class="progress-dot active"></div><div class="progress-dot"></div><div class="progress-dot"></div><div class="progress-dot"></div></div>
+  <div class="badge" style="background:rgba(162,155,254,0.15);color:var(--purple)">第七课 · 服装行业</div>
+  <div style="font-size:48px;font-weight:900;color:var(--purple);margin-top:20px">场景文案：写进生活故事里</div>
+  <div style="font-size:20px;color:rgba(255,255,255,0.4);margin-top:16px">新技能：场景叙事文案 · 氛围感描写 · 5种场景模板</div>
+</div>
+
+<div class="slide bg-dark" style="padding:28px 36px">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px"><div style="width:8px;height:8px;border-radius:50%;background:var(--purple)"></div><div style="font-size:24px;font-weight:700">三级提问对比 <span style="font-size:14px;color:rgba(255,255,255,0.3)">服装 · 女装电商</span></div></div>
+  <div class="cmp-grid" style="height:calc(100% - 56px)">
+    <div class="cmp-box cmp-L1"><div class="tag">普通人提问</div><div class="txt">帮我写一个卖女装的短视频文案。</div></div>
+    <div class="cmp-box cmp-L2"><div class="tag">高手提问</div><div class="txt">你是女装电商文案专家。
+
+我做轻法式风格女装，150-300元，目标25-35岁职场女性。
+
+帮我写一条抖音文案推一款碎花连衣裙258元，风格优雅高级。</div></div>
+    <div class="cmp-box cmp-L3"><div class="tag">顶级高手提问</div><div class="txt">你是ZARA、UR的文案创意总监，擅长"场景化穿搭文案"。
+
+【品牌】"LAMER轻法式"淘宝店，客单价200，25-35岁一线女白领。
+【推品】碎花V领收腰连衣裙258元，显瘦显白，春季通勤+约会。
+【文案方向】不写产品描述，写"穿着它的一天"——用文字让人代入穿上这条裙子的感觉。
+参考@张大奕闺蜜推荐口吻 + @Cherie氛围感文风
+【文案结构】"清晨换装的心动→通勤路上的自信→被夸的瞬间→约会的从容→下单引导"
+【风格约束】慵懒法式语气；每句≤12字；禁止"姐妹们冲""巨显瘦""炸裂"等叫卖词；要有留白感。
+
+输出：①开头钩子（制造好奇）②完整口播文案 ③氛围感字幕金句5条 ④标题3选1。</div></div>
+  </div>
+</div>
+
+<div class="slide bg-dark" style="padding:44px 56px">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:24px"><div style="width:8px;height:8px;border-radius:50%;background:var(--purple)"></div><div style="font-size:28px;font-weight:700">本课核心：<span class="c-purple">5种场景文案模板</span>（直接选）</div></div>
+  <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:24px">
+    <div class="card" style="text-align:center;padding:20px 14px"><div style="font-size:28px;font-weight:900;color:var(--purple);opacity:0.3">1</div><div style="font-size:14px;font-weight:700;color:var(--purple);margin-bottom:6px">一天叙事型</div><div style="font-size:12px;color:rgba(255,255,255,0.5)">"穿着它的一天"<br>通勤→约会→周末</div></div>
+    <div class="card" style="text-align:center;padding:20px 14px"><div style="font-size:28px;font-weight:900;color:var(--purple);opacity:0.3">2</div><div style="font-size:14px;font-weight:700;color:var(--purple);margin-bottom:6px">闺蜜安利型</div><div style="font-size:12px;color:rgba(255,255,255,0.5)">"我穿了它闺蜜<br>直接要链接"</div></div>
+    <div class="card" style="text-align:center;padding:20px 14px"><div style="font-size:28px;font-weight:900;color:var(--purple);opacity:0.3">3</div><div style="font-size:14px;font-weight:700;color:var(--purple);margin-bottom:6px">开箱惊喜型</div><div style="font-size:12px;color:rgba(255,255,255,0.5)">"拆开快递的一刻<br>我尖叫了"</div></div>
+    <div class="card" style="text-align:center;padding:20px 14px"><div style="font-size:28px;font-weight:900;color:var(--purple);opacity:0.3">4</div><div style="font-size:14px;font-weight:700;color:var(--purple);margin-bottom:6px">穿搭挑战型</div><div style="font-size:12px;color:rgba(255,255,255,0.5)">"同一件衣服<br>我搭出了5种风格"</div></div>
+    <div class="card" style="text-align:center;padding:20px 14px"><div style="font-size:28px;font-weight:900;color:var(--purple);opacity:0.3">5</div><div style="font-size:14px;font-weight:700;color:var(--purple);margin-bottom:6px">被夸记录型</div><div style="font-size:12px;color:rgba(255,255,255,0.5)">"穿了它之后<br>被夸了8次"</div></div>
+  </div>
+  <div class="card card-accent" style="border-color:var(--purple);margin-bottom:16px">
+    <div style="font-size:14px;line-height:1.8;color:rgba(255,255,255,0.7)"><span class="c-purple fw7">场景叙事 > 产品描述</span>——"穿着它被夸好好看"比"显瘦显白垂坠感好"有10倍传播力 ｜ <span class="c-purple fw7">提问时选好模板</span>，效果远好于让AI自己选</div>
+  </div>
+  <div class="practice-box"><div style="font-size:14px;font-weight:700;color:var(--yellow);margin-bottom:6px">课后练习</div><div style="font-size:13px;color:rgba(255,255,255,0.5)">选衣柜里一件衣服，用"一天叙事型"和"被夸记录型"两种模板写提问，对比输出。</div></div>
+</div>
+
+<!-- 第8课：旅游 -->
+<div class="slide" style="background:linear-gradient(135deg,#1a0a12,#2d1520,#1a1a2e);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center">
+  <div style="position:absolute;font-size:180px;font-weight:900;color:rgba(253,121,168,0.04);top:50%;left:50%;transform:translate(-50%,-55%)">08</div>
+  <div class="progress-track" style="margin-bottom:28px"><div class="progress-dot done"></div><div class="progress-dot done"></div><div class="progress-dot done"></div><div class="progress-dot done"></div><div class="progress-dot done"></div><div class="progress-dot done"></div><div class="progress-dot done"></div><div class="progress-dot active"></div><div class="progress-dot"></div><div class="progress-dot"></div></div>
+  <div class="badge" style="background:rgba(253,121,168,0.15);color:var(--pink)">第八课 · 旅游行业</div>
+  <div style="font-size:48px;font-weight:900;color:var(--pink);margin-top:20px">感官文案：五感描写种草</div>
+  <div style="font-size:20px;color:rgba(255,255,255,0.4);margin-top:16px">新技能：五感激活指令 · 禁用词库 · 文风参考人物</div>
+</div>
+
+<div class="slide bg-dark" style="padding:28px 36px">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px"><div style="width:8px;height:8px;border-radius:50%;background:var(--pink)"></div><div style="font-size:24px;font-weight:700">三级提问对比 <span style="font-size:14px;color:rgba(255,255,255,0.3)">旅游 · 云南民宿</span></div></div>
+  <div class="cmp-grid" style="height:calc(100% - 56px)">
+    <div class="cmp-box cmp-L1"><div class="tag">普通人提问</div><div class="txt">帮我写一个云南旅游的短视频文案。</div></div>
+    <div class="cmp-box cmp-L2"><div class="tag">高手提问</div><div class="txt">你是旅游类文案博主。
+
+我经营一家大理洱海边的民宿，有湖景房和庭院，380元/晚。
+
+帮我写一条小红书种草文案，治愈风格，让人想预订。</div></div>
+    <div class="cmp-box cmp-L3"><div class="tag">顶级高手提问</div><div class="txt">你是房琪、小小莎老师级别的旅行文案大师，每句话让人想截图。
+
+【民宿】大理洱海东岸"云归处"，白族老宅改建，8间房，湖景阳台看苍山日落，有机菜园+管家服务，480/晚。
+【目标】小红书种草文案，收藏2000+，带动30天预订+50%。
+【五感描写】文案必须激活观众五感：
+- 看到：苍山雪、洱海蓝、老宅白墙、晚霞金色
+- 听到：风铃声、鸟鸣、水声、白族三弦
+- 闻到：菜园薄荷味、炖鸡柴火香
+- 摸到：老木地板温润、清晨阳台凉风
+- 尝到：管家鲜花饼、现磨咖啡
+【文案结构】时间线叙事："清晨醒来→午后发呆→日落高潮→夜晚星空"
+【文风约束】每句≤10字；要文学感但不矫情；参考房琪"每句想截图"。
+【禁用词】"宝藏""绝绝子""YYDS""强烈推荐""不允许不知道"。
+
+输出：①完整口播文案 ②10条可截图的金句（用于字幕和标题）③标题3选1 ④BGM风格关键词。</div></div>
+  </div>
+</div>
+
+<div class="slide bg-dark" style="padding:44px 56px">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:24px"><div style="width:8px;height:8px;border-radius:50%;background:var(--pink)"></div><div style="font-size:28px;font-weight:700">本课核心：<span class="c-pink">五感激活模板</span>（填了就能用）</div></div>
+  <div class="two-col">
+    <div>
+      <div class="card" style="border:1px solid rgba(253,121,168,0.25);background:rgba(253,121,168,0.04)">
+        <div style="font-size:18px;font-weight:700;color:var(--pink);margin-bottom:16px">写旅游/民宿/餐饮文案前，先填这个表给AI</div>
+        <div style="font-size:16px;line-height:2.6;color:rgba(255,255,255,0.7)">
+          <span class="c-pink fw7">看到</span>：最美的3个画面 → ______<br>
+          <span class="c-pink fw7">听到</span>：环境里什么声音 → ______<br>
+          <span class="c-pink fw7">闻到</span>：空气里什么味道 → ______<br>
+          <span class="c-pink fw7">摸到</span>：皮肤感受什么 → ______<br>
+          <span class="c-pink fw7">尝到</span>：能吃到什么 → ______
+        </div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.3);margin-top:8px">填完5项，AI文案质量立刻升两个档次</div>
+      </div>
+    </div>
+    <div>
+      <div class="card card-accent" style="border-color:var(--pink);margin-bottom:14px">
+        <div style="font-size:16px;font-weight:700;color:var(--pink);margin-bottom:10px">本课3个新武器</div>
+        <div style="font-size:14px;line-height:2">
+          <span class="c-pink fw7">① 五感描写</span> —— 逐项告诉AI每种感官写什么，文案立刻"有体温"<br>
+          <span class="c-pink fw7">② 禁用词库</span> —— 封死网红烂梗，逼出有质感的文字<br>
+          <span class="c-pink fw7">③ 文风参考人物</span> —— "像房琪"一句顶一百句笼统描述
+        </div>
+      </div>
+      <div class="practice-box"><div style="font-size:14px;font-weight:700;color:var(--yellow);margin-bottom:6px">课后练习</div><div style="font-size:13px;color:rgba(255,255,255,0.5)">为你去过的一个地方填写五感模板，用顶级提问法生成种草文案。</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- 第9课：本地生活 -->
+<div class="slide" style="background:linear-gradient(135deg,#0a1a19,#152d2b,#1a1a2e);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center">
+  <div style="position:absolute;font-size:180px;font-weight:900;color:rgba(0,206,201,0.04);top:50%;left:50%;transform:translate(-50%,-55%)">09</div>
+  <div class="progress-track" style="margin-bottom:28px"><div class="progress-dot done"></div><div class="progress-dot done"></div><div class="progress-dot done"></div><div class="progress-dot done"></div><div class="progress-dot done"></div><div class="progress-dot done"></div><div class="progress-dot done"></div><div class="progress-dot done"></div><div class="progress-dot active"></div><div class="progress-dot"></div></div>
+  <div class="badge" style="background:rgba(0,206,201,0.15);color:var(--teal)">第九课 · 本地生活</div>
+  <div style="font-size:48px;font-weight:900;color:var(--teal);margin-top:20px">方言文案：让AI说"本地话"</div>
+  <div style="font-size:20px;color:rgba(255,255,255,0.4);margin-top:16px">新技能：方言注入 · 地理锚点 · 运营文案全套输出</div>
+</div>
+
+<div class="slide bg-dark" style="padding:28px 36px">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px"><div style="width:8px;height:8px;border-radius:50%;background:var(--teal)"></div><div style="font-size:24px;font-weight:700">三级提问对比 <span style="font-size:14px;color:rgba(255,255,255,0.3)">本地生活 · 社区水果店</span></div></div>
+  <div class="cmp-grid" style="height:calc(100% - 56px)">
+    <div class="cmp-box cmp-L1"><div class="tag">普通人提问</div><div class="txt">帮我写一个水果店的短视频文案。</div></div>
+    <div class="cmp-box cmp-L2"><div class="tag">高手提问</div><div class="txt">你是本地生活类文案专家。
+
+我在长沙开了一家社区水果店，主打当季鲜果，想做抖音同城号。
+
+帮我写一条25秒短视频文案，引导周边3公里到店，风格亲切热情。</div></div>
+    <div class="cmp-box cmp-L3"><div class="tag">顶级高手提问</div><div class="txt">你是帮"钱大妈""百果园"写过同城获客文案的本地生活文案专家。
+
+【门店】长沙岳麓区"果然好"水果店，小区门口，覆盖8个小区约2万住户，客单价35-50元。
+【目标】抖音同城25秒文案，引导200人到店核销团购券（9.9元=3斤应季水果）。
+【本地化要求】
+- 口播用长沙塑料普通话，夹带方言（"恰""蛮好""味道霸蛮正"）
+- 提到具体小区名/路名增加辨识度
+- 文案里写长沙人爱的水果（当季杨梅/橘子）
+【文案风格】老板娘人设：热情、实在、爱给多。不高大上，要烟火气。
+【禁用词】"尊享""甄选""品质生活"等装逼词。
+
+输出：①开头喊话式钩子 ②完整口播文案 ③字幕文案（黄色粗体风格）④标题3选1（含地名）⑤团购卡文案50字内 ⑥最佳发布时间建议。</div></div>
+  </div>
+</div>
+
+<div class="slide bg-dark" style="padding:44px 56px">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:24px"><div style="width:8px;height:8px;border-radius:50%;background:var(--teal)"></div><div style="font-size:28px;font-weight:700">本课核心：<span class="c-teal">本地化文案提问清单</span></div></div>
+  <div class="two-col">
+    <div>
+      <div class="card" style="border:1px solid rgba(0,206,201,0.25);background:rgba(0,206,201,0.04)">
+        <div style="font-size:18px;font-weight:700;color:var(--teal);margin-bottom:16px">写本地生活文案，提问必须给AI</div>
+        <div style="font-size:15px;line-height:2.4;color:rgba(255,255,255,0.7)">
+          <span class="c-teal fw7">城市/区域</span>：精确到区和街道<br>
+          <span class="c-teal fw7">覆盖人群</span>：周边小区数量和人口<br>
+          <span class="c-teal fw7">方言词汇</span>：列出3-5个本地口语<br>
+          <span class="c-teal fw7">本地偏好</span>：当地人喜欢什么<br>
+          <span class="c-teal fw7">促销钩子</span>：团购券具体内容<br>
+          <span class="c-teal fw7">人设定位</span>：老板/老板娘什么性格
+        </div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.3);margin-top:8px">没有本地细节的"本地生活"文案 = 无效文案</div>
+      </div>
+    </div>
+    <div>
+      <div class="card card-accent" style="border-color:var(--teal);margin-bottom:14px">
+        <div style="font-size:16px;font-weight:700;color:var(--teal);margin-bottom:10px">本课3个新武器</div>
+        <div style="font-size:14px;line-height:2">
+          <span class="c-teal fw7">① 方言注入</span> —— 给AI具体词汇，它就能写出本地人觉得亲切的文案<br>
+          <span class="c-teal fw7">② 地理锚点</span> —— 小区名、路名是同城号文案的流量密码<br>
+          <span class="c-teal fw7">③ 运营全套</span> —— 口播+标题+团购文案+发布时间，一次全要
+        </div>
+      </div>
+      <div class="practice-box"><div style="font-size:14px;font-weight:700;color:var(--yellow);margin-bottom:6px">课后练习</div><div style="font-size:13px;color:rgba(255,255,255,0.5)">选你家楼下一家店，用本地化提问法为它写一条抖音同城文案。</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================ -->
+<!-- ====================== 第10课：终极整合 ======================== -->
+<!-- ================================================================ -->
+<div class="slide" style="background:linear-gradient(135deg,#1a0f08,#2d1a10,#1a1a2e);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center">
+  <div style="position:absolute;font-size:180px;font-weight:900;color:rgba(225,112,85,0.04);top:50%;left:50%;transform:translate(-50%,-55%)">10</div>
+  <div class="progress-track" style="margin-bottom:28px"><div class="progress-dot done"></div><div class="progress-dot done"></div><div class="progress-dot done"></div><div class="progress-dot done"></div><div class="progress-dot done"></div><div class="progress-dot done"></div><div class="progress-dot done"></div><div class="progress-dot done"></div><div class="progress-dot done"></div><div class="progress-dot active"></div></div>
+  <div class="badge" style="background:rgba(225,112,85,0.15);color:var(--coral)">第十课 · 知识付费</div>
+  <div style="font-size:48px;font-weight:900;color:var(--coral);margin-top:20px">终极整合：RECIPE万能框架</div>
+  <div style="font-size:20px;color:rgba(255,255,255,0.4);margin-top:16px">把前9课所学融为一套终身可用的提问系统</div>
+</div>
+
+<!-- RECIPE模型 -->
+<div class="slide bg-dark" style="padding:44px 56px">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:28px"><div style="width:10px;height:10px;border-radius:50%;background:var(--coral)"></div><div style="font-size:28px;font-weight:900">万能提问框架：<span class="c-yellow">RECIPE模型</span></div></div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px">
+    <div class="card" style="text-align:center;padding:24px 18px;border:1px solid rgba(255,107,107,0.2)"><div style="font-size:48px;font-weight:900;color:var(--red);opacity:0.3">R</div><div style="font-size:18px;font-weight:700;color:var(--red)">Role 角色</div><div style="font-size:13px;color:rgba(255,255,255,0.5);margin-top:6px">给AI一个具体的文案专家身份</div></div>
+    <div class="card" style="text-align:center;padding:24px 18px;border:1px solid rgba(255,165,2,0.2)"><div style="font-size:48px;font-weight:900;color:var(--orange);opacity:0.3">E</div><div style="font-size:18px;font-weight:700;color:var(--orange)">Example 参考</div><div style="font-size:13px;color:rgba(255,255,255,0.5);margin-top:6px">给爆款文案的结构/文风参考</div></div>
+    <div class="card" style="text-align:center;padding:24px 18px;border:1px solid rgba(255,210,0,0.2)"><div style="font-size:48px;font-weight:900;color:var(--yellow);opacity:0.3">C</div><div style="font-size:18px;font-weight:700;color:var(--yellow)">Context 背景</div><div style="font-size:13px;color:rgba(255,255,255,0.5);margin-top:6px">产品卖点+受众画像+平台</div></div>
+    <div class="card" style="text-align:center;padding:24px 18px;border:1px solid rgba(123,237,159,0.2)"><div style="font-size:48px;font-weight:900;color:var(--green);opacity:0.3">I</div><div style="font-size:18px;font-weight:700;color:var(--green)">Intent 目标</div><div style="font-size:13px;color:rgba(255,255,255,0.5);margin-top:6px">文案要达成的可量化目标</div></div>
+    <div class="card" style="text-align:center;padding:24px 18px;border:1px solid rgba(112,161,255,0.2)"><div style="font-size:48px;font-weight:900;color:var(--blue);opacity:0.3">P</div><div style="font-size:18px;font-weight:700;color:var(--blue)">Perimeter 边界</div><div style="font-size:13px;color:rgba(255,255,255,0.5);margin-top:6px">风格约束+禁用词+红线</div></div>
+    <div class="card" style="text-align:center;padding:24px 18px;border:1px solid rgba(225,112,85,0.2)"><div style="font-size:48px;font-weight:900;color:var(--coral);opacity:0.3">E</div><div style="font-size:18px;font-weight:700;color:var(--coral)">Export 输出</div><div style="font-size:13px;color:rgba(255,255,255,0.5);margin-top:6px">钩子/口播/字幕/标题/评论</div></div>
+  </div>
+  <div class="formula-bar">
+    <div class="f-main">普通人填1项（只有I）→ 高手填3项 → 顶级高手填满6项</div>
+    <div class="f-sub">每多填一项RECIPE，AI写出的文案质量提升一个等级</div>
+  </div>
+</div>
+
+<!-- 第10课对比 -->
+<div class="slide bg-dark" style="padding:28px 36px">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px"><div style="width:8px;height:8px;border-radius:50%;background:var(--coral)"></div><div style="font-size:24px;font-weight:700">三级提问对比 <span style="font-size:14px;color:rgba(255,255,255,0.3)">知识付费 · 理财课</span></div></div>
+  <div class="cmp-grid" style="height:calc(100% - 56px)">
+    <div class="cmp-box cmp-L1"><div class="tag">普通人提问</div><div class="txt">帮我写一个卖理财课的短视频文案。</div></div>
+    <div class="cmp-box cmp-L2"><div class="tag">高手提问</div><div class="txt">你是知识付费领域的文案专家。
+
+我有一门"小白理财入门课"，99元，教基金定投和记账，目标月薪5000-10000的上班族。
+
+帮我写一条抖音文案引导购买，风格扎心但给希望。</div></div>
+    <div class="cmp-box cmp-L3"><div class="tag">顶级高手提问</div><div class="txt">你是帮长投学堂、简七理财写过百万GMV文案的知识付费操盘手。
+
+【R·角色】以"过来人"身份写，人设：从月光族到3年存下20万的普通上班族。
+【E·参考】@巫师财经"故事+数据"叙事 + @她理财"闺蜜聊天"口吻。结构："扎心现实→数据冲击→转折故事→方法预告→限时引导"
+【C·背景】"30天小白理财计划"99元/30节，5000+学员，好评率97%。
+【I·目标】抖音45秒文案，目标300+订单。
+【P·边界】不承诺收益；不用"躺赚""暴富"；有免责声明；用共情不用说教。
+【E·输出】①钩子3选1 ②完整口播文案 ③字幕金句3条 ④标题3选1 ⑤评论预埋5条 ⑥小黄车商品标题15字内。</div></div>
+  </div>
+</div>
+
+<!-- 总复习 -->
+<div class="slide bg-dark" style="padding:44px 56px">
+  <div style="font-size:32px;font-weight:900;color:var(--yellow);margin-bottom:24px">总复习 · 10堂课文案技能树</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:13.5px">
+    <div class="card" style="padding:14px 18px;border-left:3px solid var(--red)"><span class="c-red fw7">第1课·餐饮</span> —— 文案5件套（钩子+口播+字幕+标题+评论）+ 禁用词</div>
+    <div class="card" style="padding:14px 18px;border-left:3px solid var(--orange)"><span class="c-orange fw7">第2课·美妆</span> —— 受众画像 + 情绪主线 + 禁用广告腔</div>
+    <div class="card" style="padding:14px 18px;border-left:3px solid var(--yellow)"><span class="c-yellow fw7">第3课·教育</span> —— 受众心理建模 + 情绪路线 + 合规红线</div>
+    <div class="card" style="padding:14px 18px;border-left:3px solid var(--green)"><span class="c-green fw7">第4课·房产</span> —— 数据文案 + 算账型结构 + 反向信任</div>
+    <div class="card" style="padding:14px 18px;border-left:3px solid var(--blue)"><span class="c-blue fw7">第5课·健身</span> —— IP人设档案 + 调性组合 + 口头禅设计</div>
+    <div class="card" style="padding:14px 18px;border-left:3px solid var(--indigo)"><span class="c-indigo fw7">第6课·母婴</span> —— 体裁切换 + 信任证据链 + 真实感写法</div>
+    <div class="card" style="padding:14px 18px;border-left:3px solid var(--purple)"><span class="c-purple fw7">第7课·服装</span> —— 场景叙事 + 氛围感文字 + 5种场景模板</div>
+    <div class="card" style="padding:14px 18px;border-left:3px solid var(--pink)"><span class="c-pink fw7">第8课·旅游</span> —— 五感激活模板 + 禁用词库 + 文风参考人物</div>
+    <div class="card" style="padding:14px 18px;border-left:3px solid var(--teal)"><span class="c-teal fw7">第9课·本地</span> —— 方言注入 + 地理锚点 + 运营文案全套</div>
+    <div class="card" style="padding:14px 18px;border-left:3px solid var(--coral)"><span class="c-coral fw7">第10课·知识付费</span> —— RECIPE万能框架（R+E+C+I+P+E）</div>
+  </div>
+  <div class="formula-bar" style="margin-top:18px">
+    <div class="f-main" style="font-size:22px">所有技能汇聚为一个框架：RECIPE</div>
+  </div>
+</div>
+
+<!-- 万能模板 -->
+<div class="slide bg-dark" style="padding:44px 56px">
+  <div style="font-size:32px;font-weight:900;margin-bottom:24px">带走这张图 · <span class="c-yellow">万能文案提问模板</span></div>
+  <div style="background:rgba(255,210,0,0.06);border:2px solid rgba(255,210,0,0.25);border-radius:16px;padding:28px 36px;font-size:15px;line-height:2.4">
+    <span class="c-red fw7">【R·角色】</span>你是______领域写过______爆款文案的______专家。<br>
+    <span class="c-orange fw7">【E·参考】</span>参照______的文案风格/结构："______→______→______→______"。<br>
+    <span class="c-yellow fw7">【C·背景】</span>产品/服务：______，价格______，核心卖点______。<br>
+    <span style="color:var(--yellow)">　　　　　</span>受众：______岁，______身份，核心焦虑______，决策障碍______。<br>
+    <span class="c-green fw7">【I·目标】</span>______平台______秒短视频文案，目标______。<br>
+    <span class="c-blue fw7">【P·边界】</span>风格：______。禁用词：______。红线：______。<br>
+    <span class="c-coral fw7">【E·输出】</span>请输出：①钩子 ②口播词 ③字幕金句 ④标题___选1 ⑤评论预埋。
+  </div>
+  <div style="text-align:center;margin-top:18px;font-size:16px;color:rgba(255,255,255,0.4)">截图保存 → 每次提问前花2分钟填完 → 文案质量翻倍</div>
+</div>
+
+<!-- 自检评分 -->
+<div class="slide bg-dark" style="padding:44px 56px">
+  <div style="font-size:32px;font-weight:900;margin-bottom:24px">自检工具 · <span class="c-yellow">你的提问能打几分？</span></div>
+  <div style="display:grid;grid-template-columns:auto 1fr auto;gap:8px 20px;font-size:15px;align-items:center">
+    <div class="c-red fw7">R·角色</div><div style="color:rgba(255,255,255,0.6)">给了AI具体文案专家身份？（不是"文案高手"而是"写过XX品牌爆款的XX"）</div><div class="c-yellow fw7">+2分</div>
+    <div class="c-orange fw7">E·参考</div><div style="color:rgba(255,255,255,0.6)">给了拆解过的爆款文案结构？（不是链接而是"钩子→共鸣→验证→引导"模型）</div><div class="c-yellow fw7">+2分</div>
+    <div class="c-yellow fw7">C·背景</div><div style="color:rgba(255,255,255,0.6)">提供了产品卖点+受众画像？（具体数据+焦虑/决策障碍）</div><div class="c-yellow fw7">+2分</div>
+    <div class="c-green fw7">I·目标</div><div style="color:rgba(255,255,255,0.6)">目标可量化？（不是"种草"而是"互动率8%""300订单"）</div><div class="c-yellow fw7">+1分</div>
+    <div class="c-blue fw7">P·边界</div><div style="color:rgba(255,255,255,0.6)">有风格约束+禁用词？（封死废话，逼出好文案）</div><div class="c-yellow fw7">+1分</div>
+    <div class="c-coral fw7">E·输出</div><div style="color:rgba(255,255,255,0.6)">明确要哪些交付物？（钩子/口播/字幕/标题/评论 五件套）</div><div class="c-yellow fw7">+1分</div>
+    <div style="font-size:12px;color:rgba(255,255,255,0.3)">加分项</div><div style="color:rgba(255,255,255,0.6)">包含情绪路线/五感描写/体裁指定/方言注入/IP人设等高级技巧？</div><div class="c-yellow fw7">+1分</div>
+  </div>
+  <div style="display:flex;gap:16px;margin-top:28px">
+    <div class="card" style="flex:1;text-align:center;border-color:rgba(255,107,107,0.3)"><div style="font-size:28px;font-weight:900;color:var(--red)">0-3分</div><div style="font-size:13px;color:rgba(255,255,255,0.4);margin-top:4px">普通人 · AI给废话</div></div>
+    <div class="card" style="flex:1;text-align:center;border-color:rgba(112,161,255,0.3)"><div style="font-size:28px;font-weight:900;color:var(--blue)">4-6分</div><div style="font-size:13px;color:rgba(255,255,255,0.4);margin-top:4px">高手 · AI给像样文案</div></div>
+    <div class="card" style="flex:1;text-align:center;border-color:rgba(255,210,0,0.3)"><div style="font-size:28px;font-weight:900;color:var(--yellow)">7-10分</div><div style="font-size:13px;color:rgba(255,255,255,0.4);margin-top:4px">顶级高手 · 拿到就能发</div></div>
+  </div>
+  <div style="text-align:center;margin-top:16px;font-size:14px;color:rgba(255,255,255,0.3)">每次写完提问用这个表自检。低于7分就继续补信息</div>
+</div>
+
+<!-- 结束页 -->
+<div class="slide" style="background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center">
+  <div style="position:absolute;width:600px;height:600px;border-radius:50%;border:1px solid rgba(255,215,0,0.06);top:-150px;right:-100px"></div>
+  <div class="badge" style="background:linear-gradient(90deg,#f7971e,#ffd200);color:#1a1a2e;font-size:16px;margin-bottom:32px">课程完结</div>
+  <div style="font-size:48px;font-weight:900;background:linear-gradient(90deg,#ffd200,#f7971e);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1.4;margin-bottom:20px">提问即能力<br>会提问的人，AI为你写爆款</div>
+  <div style="margin-top:24px;padding:20px 48px;background:rgba(255,210,0,0.08);border:1px solid rgba(255,210,0,0.2);border-radius:14px">
+    <div style="font-size:20px;color:var(--yellow);font-weight:700;margin-bottom:8px">记住RECIPE六字诀</div>
+    <div style="font-size:16px;color:rgba(255,255,255,0.5)">Role · Example · Context · Intent · Perimeter · Export</div>
+  </div>
+  <div style="margin-top:32px;font-size:14px;color:rgba(255,255,255,0.2)">10堂课 · 10个行业 · 1套终身可用的AI文案提问系统</div>
+</div>
+
+</body>
+</html>
