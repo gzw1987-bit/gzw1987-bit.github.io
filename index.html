@@ -3,406 +3,125 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Zhengwen's Knowledge Base</title>
+<title>Zhengwen Ge</title>
 <style>
 :root {
   --bg: #08080e;
   --bg2: #0e0e1a;
   --gold: #c8a04a;
-  --gold-dim: #8a6d2f;
-  --gold-glow: rgba(200,160,74,0.1);
+  --gold-dim: #6b4d22;
+  --gold-glow: rgba(200,160,74,0.08);
   --text: #ccc8be;
-  --text-dim: #706c62;
+  --text-dim: #605c52;
   --accent: #e8c668;
 }
-* { margin:0; padding:0; box-sizing:border-box; }
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: -apple-system, 'Segoe UI', 'Noto Sans SC', sans-serif;
-  font-size: 15px;
-  line-height: 1.7;
-  min-height: 100vh;
-}
-::selection { background: var(--gold); color: var(--bg); }
-a { color: var(--gold); text-decoration: none; transition: color .2s; }
-a:hover { color: var(--accent); }
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,'Segoe UI','Noto Sans SC',sans-serif;min-height:100vh}
+::selection{background:var(--gold);color:var(--bg)}
+a{color:var(--gold);text-decoration:none;transition:color .2s}
+a:hover{color:var(--accent)}
 
-.header {
-  text-align: center;
-  padding: 5rem 2rem 3rem;
-  position: relative;
-}
-.header::before {
-  content: '';
-  position: absolute;
-  width: 400px; height: 400px;
-  border-radius: 50%;
-  background: radial-gradient(circle, var(--gold-glow), transparent 70%);
-  top: 50%; left: 50%;
-  transform: translate(-50%,-50%);
-}
-.header h1 {
-  font-size: clamp(1.6rem,3.5vw,2.5rem);
-  font-weight: 200;
-  color: var(--gold);
-  letter-spacing: .12em;
-  position: relative;
-}
-.header .sub {
-  color: var(--text-dim);
-  font-size: .9rem;
-  margin-top: .5rem;
-  position: relative;
-}
-.stats {
-  display: flex;
-  justify-content: center;
-  gap: 2.5rem;
-  margin-top: 2rem;
-  position: relative;
-}
-.stat { text-align: center; }
-.stat .n { font-size: 1.8rem; color: var(--accent); font-weight: 200; }
-.stat .l { font-size: .7rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: .1em; }
+.page{max-width:760px;margin:0 auto;padding:2rem}
 
-.container {
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: 2rem;
+/* Header */
+.header{padding:6rem 0 4rem;text-align:center;position:relative}
+.header::before{content:'';position:absolute;width:350px;height:350px;border-radius:50%;background:radial-gradient(circle,var(--gold-glow),transparent 70%);top:40%;left:50%;transform:translate(-50%,-50%)}
+.header h1{font-size:1.6rem;font-weight:200;color:var(--gold);letter-spacing:.15em;position:relative}
+.header .bio{font-size:.85rem;color:var(--text-dim);margin-top:.8rem;position:relative;line-height:1.8}
+
+/* Works */
+.works{padding:2rem 0}
+.works-title{font-size:.7rem;color:var(--text-dim);letter-spacing:.2em;text-transform:uppercase;margin-bottom:2rem}
+
+.work-item{
+  display:block;
+  padding:1.5rem 0;
+  border-bottom:1px solid rgba(255,255,255,.04);
+  transition:padding-left .3s;
+}
+.work-item:first-child{border-top:1px solid rgba(255,255,255,.04)}
+.work-item:hover{padding-left:.8rem}
+.work-title{font-size:1.05rem;color:var(--text);transition:color .2s}
+.work-item:hover .work-title{color:var(--accent)}
+.work-desc{font-size:.8rem;color:var(--text-dim);margin-top:.3rem;line-height:1.6}
+.work-meta{font-size:.65rem;color:var(--text-dim);margin-top:.5rem;opacity:.5}
+.work-tags{margin-top:.4rem}
+.work-tag{
+  display:inline-block;font-size:.6rem;
+  padding:.1rem .45rem;border-radius:3px;
+  margin-right:.3rem;
+  background:rgba(200,160,74,.08);color:var(--gold-dim);
+  border:1px solid rgba(200,160,74,.1);
 }
 
-.category {
-  margin-bottom: 3rem;
+.empty{
+  text-align:center;
+  padding:4rem 0;
+  color:var(--text-dim);
+  font-size:.85rem;
 }
-.cat-header {
-  display: flex;
-  align-items: center;
-  gap: .8rem;
-  margin-bottom: 1.2rem;
-  padding-bottom: .5rem;
-  border-bottom: 1px solid rgba(200,160,74,.15);
+.empty .dot{
+  display:inline-block;width:6px;height:6px;
+  border-radius:50%;background:var(--gold-dim);
+  margin:0 .2rem;animation:blink 2s ease-in-out infinite;
 }
-.cat-icon { font-size: 1.3rem; }
-.cat-title {
-  font-size: 1.15rem;
-  color: var(--gold);
-  font-weight: 300;
-  letter-spacing: .06em;
-}
-.cat-count {
-  font-size: .7rem;
-  color: var(--text-dim);
-  background: rgba(200,160,74,.08);
-  padding: .1rem .5rem;
-  border-radius: 3px;
-}
+.empty .dot:nth-child(2){animation-delay:.3s}
+.empty .dot:nth-child(3){animation-delay:.6s}
+@keyframes blink{0%,100%{opacity:.2}50%{opacity:1}}
 
-.card-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1rem;
-}
-.card {
-  background: var(--bg2);
-  border: 1px solid rgba(255,255,255,.05);
-  border-radius: 8px;
-  padding: 1.2rem;
-  transition: border-color .3s, transform .2s;
-  display: block;
-}
-.card:hover {
-  border-color: var(--gold-dim);
-  transform: translateY(-2px);
-  color: var(--text);
-}
-.card-title {
-  font-size: .95rem;
-  color: var(--accent);
-  margin-bottom: .3rem;
-}
-.card-desc {
-  font-size: .8rem;
-  color: var(--text-dim);
-  line-height: 1.6;
-}
-.card-meta {
-  font-size: .65rem;
-  color: var(--text-dim);
-  margin-top: .6rem;
-  opacity: .6;
-}
-.card-tag {
-  display: inline-block;
-  font-size: .6rem;
-  padding: .1rem .4rem;
-  border-radius: 3px;
-  margin-right: .3rem;
-}
-.tag-star { background: rgba(200,160,74,.15); color: var(--gold); }
-.tag-paper { background: rgba(170,102,238,.12); color: #a6e; }
-.tag-interactive { background: rgba(68,170,153,.12); color: #4a9; }
-.tag-report { background: rgba(85,153,238,.12); color: #59e; }
-
-.footer {
-  text-align: center;
-  padding: 3rem 2rem;
-  color: var(--text-dim);
-  font-size: .75rem;
-  border-top: 1px solid rgba(255,255,255,.04);
+.footer{
+  text-align:center;padding:4rem 0 2rem;
+  font-size:.7rem;color:var(--text-dim);
+  opacity:.4;
 }
 </style>
 </head>
 <body>
+<div class="page">
 
-<div class="header">
-  <h1>ZHENGWEN'S KNOWLEDGE BASE</h1>
-  <div class="sub">易经 · 方法论 · 研究 · 元认知</div>
-  <div class="stats">
-    <div class="stat"><div class="n">37</div><div class="l">Pages</div></div>
-    <div class="stat"><div class="n">5</div><div class="l">Categories</div></div>
-    <div class="stat"><div class="n">166</div><div class="l">Days of AI Collab</div></div>
-  </div>
-</div>
-
-<div class="container">
-
-  <!-- YIJING -->
-  <div class="category">
-    <div class="cat-header">
-      <span class="cat-icon">&#9776;</span>
-      <span class="cat-title">易经 Yi Jing</span>
-      <span class="cat-count">22 pages</span>
-    </div>
-    <div class="card-grid">
-      <a class="card" href="yijing/derivation-journey.html">
-        <div class="card-title">易经衍化之旅</div>
-        <div class="card-desc">太极→两仪→四象→八卦→64卦→384爻 完整推演链路，13个交互阶段</div>
-        <div class="card-meta"><span class="card-tag tag-star">核心</span><span class="card-tag tag-interactive">交互</span> 184KB · 3400行</div>
-      </a>
-      <a class="card" href="yijing/wave-compare.html">
-        <div class="card-title">涛动周期 × 易经波形比对</div>
-        <div class="card-desc">康波周期 × DJIA × 十二消息卦 三层时间线 1780-2026</div>
-        <div class="card-meta"><span class="card-tag tag-star">核心</span><span class="card-tag tag-interactive">交互</span> 84KB · 2044行</div>
-      </a>
-      <a class="card" href="yijing/binary-yaoci.html">
-        <div class="card-title">二进制爻辞可视化</div>
-        <div class="card-desc">64卦 × 384爻辞的二进制编码全景，四模式圆环可视化</div>
-        <div class="card-meta"><span class="card-tag tag-interactive">交互</span> 224KB</div>
-      </a>
-      <a class="card" href="yijing/game-theory.html">
-        <div class="card-title">博弈论 × 易经</div>
-        <div class="card-desc">43/64卦覆盖19种博弈模型，冯诺伊曼未读过易经却独立同构</div>
-        <div class="card-meta"><span class="card-tag tag-paper">研究</span></div>
-      </a>
-      <a class="card" href="yijing/genome-view.html">
-        <div class="card-title">基因组学分析</div>
-        <div class="card-desc">文王卦序断点率 96.8%，保守区段仅 2 个，彻底度是人vs猩的 2435 倍</div>
-        <div class="card-meta"><span class="card-tag tag-paper">研究</span></div>
-      </a>
-      <a class="card" href="yijing/four-minds.html">
-        <div class="card-title">四种心智模型</div>
-        <div class="card-desc">伏羲·文王·周公·孔子——四种认知范式的可视化比对</div>
-        <div class="card-meta"><span class="card-tag tag-interactive">交互</span></div>
-      </a>
-      <a class="card" href="yijing/coupled-system.html">
-        <div class="card-title">耦合系统分析</div>
-        <div class="card-desc">64卦作为耦合系统的动力学分析</div>
-        <div class="card-meta"><span class="card-tag tag-paper">研究</span></div>
-      </a>
-      <a class="card" href="yijing/coupled-cycles.html">
-        <div class="card-title">耦合循环</div>
-        <div class="card-desc">卦象循环结构的耦合关系可视化</div>
-        <div class="card-meta"><span class="card-tag tag-interactive">交互</span></div>
-      </a>
-      <a class="card" href="yijing/shang-timeline.html">
-        <div class="card-title">商朝时间线</div>
-        <div class="card-desc">易经的历史脉络与商周背景</div>
-        <div class="card-meta"><span class="card-tag tag-interactive">交互</span></div>
-      </a>
-      <a class="card" href="yijing/algorithm-animation.html">
-        <div class="card-title">算法动画</div>
-        <div class="card-desc">置换循环与卦序算法的可视化动画</div>
-        <div class="card-meta"><span class="card-tag tag-interactive">交互</span></div>
-      </a>
-      <a class="card" href="yijing/permutation-cycle-paper.html">
-        <div class="card-title">置换循环 [52,10,2] 论文</div>
-        <div class="card-desc">伏羲序→文王序映射的循环分解，全网无先例的原创发现</div>
-        <div class="card-meta"><span class="card-tag tag-star">核心</span><span class="card-tag tag-paper">论文</span></div>
-      </a>
-      <a class="card" href="yijing/paper-en.html">
-        <div class="card-title">Paper (English)</div>
-        <div class="card-desc">The King Wen Permutation [52, 10, 2] — English version</div>
-        <div class="card-meta"><span class="card-tag tag-paper">论文</span></div>
-      </a>
-      <a class="card" href="yijing/verify-permutation.html">
-        <div class="card-title">置换验证工具</div>
-        <div class="card-desc">可复现的置换循环分解验证代码</div>
-        <div class="card-meta"><span class="card-tag tag-interactive">工具</span></div>
-      </a>
-      <a class="card" href="yijing/report.html">
-        <div class="card-title">从 0 到 1 报告</div>
-        <div class="card-desc">衍化之旅的完整互动式推演报告</div>
-        <div class="card-meta"><span class="card-tag tag-report">报告</span></div>
-      </a>
-      <a class="card" href="yijing/npd-analysis.html">
-        <div class="card-title">NPD × 易经诊断</div>
-        <div class="card-desc">10卦受害者诊断系统，11章深度分析</div>
-        <div class="card-meta"><span class="card-tag tag-paper">研究</span></div>
-      </a>
-      <a class="card" href="yijing/bit-music.html">
-        <div class="card-title">Bit Music</div>
-        <div class="card-desc">卦象的音乐化表达</div>
-        <div class="card-meta"><span class="card-tag tag-interactive">交互</span></div>
-      </a>
-      <a class="card" href="yijing/bit-morse.html">
-        <div class="card-title">Bit Morse</div>
-        <div class="card-desc">卦象与莫尔斯码的同构映射</div>
-        <div class="card-meta"><span class="card-tag tag-interactive">交互</span></div>
-      </a>
-      <a class="card" href="yijing/bit-voltage.html">
-        <div class="card-title">Bit Voltage</div>
-        <div class="card-desc">卦象的电压波形表达</div>
-        <div class="card-meta"><span class="card-tag tag-interactive">交互</span></div>
-      </a>
-      <a class="card" href="yijing/bit-forms.html">
-        <div class="card-title">Bit Forms</div>
-        <div class="card-desc">卦象的多形态可视化</div>
-        <div class="card-meta"><span class="card-tag tag-interactive">交互</span></div>
-      </a>
-      <a class="card" href="yijing/bit-arrangements.html">
-        <div class="card-title">Bit Arrangements</div>
-        <div class="card-desc">卦象的排列组合可视化</div>
-        <div class="card-meta"><span class="card-tag tag-interactive">交互</span></div>
-      </a>
+  <div class="header">
+    <h1>ZHENGWEN GE</h1>
+    <div class="bio">
+      Quantitative thinker. Yi Jing researcher.<br>
+      Building systems that generate insight.
     </div>
   </div>
 
-  <!-- FRAMEWORKS -->
-  <div class="category">
-    <div class="cat-header">
-      <span class="cat-icon">&#9881;</span>
-      <span class="cat-title">方法论 Frameworks</span>
-      <span class="cat-count">3 pages</span>
-    </div>
-    <div class="card-grid">
-      <a class="card" href="frameworks/mckinsey.html">
-        <div class="card-title">McKinsey 方法论</div>
-        <div class="card-desc">MECE、金字塔原理、问题树、假设驱动、五力模型等 12 个框架交互展示</div>
-        <div class="card-meta"><span class="card-tag tag-interactive">交互</span></div>
-      </a>
-      <a class="card" href="frameworks/cybernetics.html">
-        <div class="card-title">控制论 Cybernetics</div>
-        <div class="card-desc">反馈回路、Ashby 定律、VSM、因果回路图等 12 个框架交互展示</div>
-        <div class="card-meta"><span class="card-tag tag-interactive">交互</span></div>
-      </a>
-      <a class="card" href="frameworks/mckinsey-showcase.html">
-        <div class="card-title">McKinsey Showcase</div>
-        <div class="card-desc">McKinsey 方法论展示页</div>
-        <div class="card-meta"><span class="card-tag tag-interactive">展示</span></div>
-      </a>
+  <div class="works">
+    <div class="works-title">Published Works</div>
+    <div id="works-list">
+      <div class="empty">
+        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+        <br>Coming soon
+      </div>
     </div>
   </div>
 
-  <!-- RESEARCH -->
-  <div class="category">
-    <div class="cat-header">
-      <span class="cat-icon">&#128218;</span>
-      <span class="cat-title">调研 Research</span>
-      <span class="cat-count">7 pages</span>
-    </div>
-    <div class="card-grid">
-      <a class="card" href="research/shenzhen-luxury.html">
-        <div class="card-title">深圳 5000 万+豪宅调研</div>
-        <div class="card-desc">深圳顶级豪宅市场完整互动报告</div>
-        <div class="card-meta"><span class="card-tag tag-report">报告</span><span class="card-tag tag-interactive">交互</span></div>
-      </a>
-      <a class="card" href="research/shenzhen-3000w.html">
-        <div class="card-title">深圳 3000 万+报告</div>
-        <div class="card-desc">深圳高端住宅市场分析</div>
-        <div class="card-meta"><span class="card-tag tag-report">报告</span></div>
-      </a>
-      <a class="card" href="research/fengshui.html">
-        <div class="card-title">风水学发展脉络</div>
-        <div class="card-desc">从先秦到现代，风水学的完整历史脉络交互可视化</div>
-        <div class="card-meta"><span class="card-tag tag-interactive">交互</span></div>
-      </a>
-      <a class="card" href="research/fengshui-dark.html">
-        <div class="card-title">风水学（暗色版）</div>
-        <div class="card-desc">暗色主题版本</div>
-        <div class="card-meta"><span class="card-tag tag-interactive">交互</span></div>
-      </a>
-      <a class="card" href="research/fengshui-design.html">
-        <div class="card-title">风水 × 设计翻译</div>
-        <div class="card-desc">风水理念在现代空间设计中的应用转化</div>
-        <div class="card-meta"><span class="card-tag tag-report">报告</span></div>
-      </a>
-      <a class="card" href="research/xiaohongshu-strategy.html">
-        <div class="card-title">小红书策略</div>
-        <div class="card-desc">小红书平台运营策略分析</div>
-        <div class="card-meta"><span class="card-tag tag-report">报告</span></div>
-      </a>
-      <a class="card" href="research/two-personas.html">
-        <div class="card-title">双重人设</div>
-        <div class="card-desc">双人设策略分析</div>
-        <div class="card-meta"><span class="card-tag tag-report">报告</span></div>
-      </a>
-    </div>
-  </div>
-
-  <!-- META -->
-  <div class="category">
-    <div class="cat-header">
-      <span class="cat-icon">&#9733;</span>
-      <span class="cat-title">元认知 Meta</span>
-      <span class="cat-count">3 pages</span>
-    </div>
-    <div class="card-grid">
-      <a class="card" href="meta/claude-journey.html">
-        <div class="card-title">166 天旅程全景</div>
-        <div class="card-desc">从第一天到今天的完整 Claude Code 协作旅程：时间线、认知突破、深层洞察</div>
-        <div class="card-meta"><span class="card-tag tag-star">核心</span><span class="card-tag tag-interactive">交互</span> 1733条消息 · 8个深层洞察</div>
-      </a>
-      <a class="card" href="meta/prompt-self-analysis.html">
-        <div class="card-title">AI 协作自我考古</div>
-        <div class="card-desc">4+3 层深度自我分析框架：事实→模式→认知→行动 + 意图裂缝·共演化·决策考古</div>
-        <div class="card-meta"><span class="card-tag tag-star">核心</span><span class="card-tag tag-interactive">交互</span></div>
-      </a>
-      <a class="card" href="meta/permutation-cycles.html">
-        <div class="card-title">置换循环可视化</div>
-        <div class="card-desc">置换循环 [52,10,2] 的交互式探索工具</div>
-        <div class="card-meta"><span class="card-tag tag-interactive">工具</span></div>
-      </a>
-    </div>
-  </div>
-
-  <!-- COURSE -->
-  <div class="category">
-    <div class="cat-header">
-      <span class="cat-icon">&#127891;</span>
-      <span class="cat-title">课程 Course</span>
-      <span class="cat-count">2 pages</span>
-    </div>
-    <div class="card-grid">
-      <a class="card" href="course/ai-prompt-v3.html">
-        <div class="card-title">AI 提示词的艺术 v3</div>
-        <div class="card-desc">10堂课教小白掌握 AI 提问——普通人 vs 高手 vs 顶级高手</div>
-        <div class="card-meta"><span class="card-tag tag-star">最新</span></div>
-      </a>
-      <a class="card" href="course/ai-prompt-v2.html">
-        <div class="card-title">AI 提示词的艺术 v2</div>
-        <div class="card-desc">第二版课程 PPT</div>
-        <div class="card-meta"><span class="card-tag tag-report">课件</span></div>
-      </a>
-    </div>
-  </div>
+  <div class="footer">Zhengwen Ge</div>
 
 </div>
 
-<div class="footer">
-  Zhengwen's Knowledge Base<br>
-  Built with Claude Code · 37 interactive pages · All zero-dependency single-file HTML
-</div>
-
+<script>
+fetch('published.json')
+  .then(r=>r.json())
+  .then(items=>{
+    if(!items.length) return;
+    const list=document.getElementById('works-list');
+    list.innerHTML='';
+    items.forEach(item=>{
+      const a=document.createElement('a');
+      a.className='work-item';
+      a.href=item.path;
+      a.innerHTML=`
+        <div class="work-title">${item.title}</div>
+        <div class="work-desc">${item.desc}</div>
+        <div class="work-tags">${(item.tags||[]).map(t=>`<span class="work-tag">${t}</span>`).join('')}</div>
+        <div class="work-meta">${item.date||''}</div>
+      `;
+      list.appendChild(a);
+    });
+  })
+  .catch(()=>{});
+</script>
 </body>
 </html>
