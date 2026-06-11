@@ -1,0 +1,233 @@
+{
+  "updatedAt": "2026-06-11",
+  "source": "/home/gezhengewen/meta-brain/codex-quota-project-burn-plan-2026-06-11.md",
+  "headline": "量化系统 / AI Agent / 内容产品 / 基础设施",
+  "groups": [
+    {
+      "tier": "S",
+      "name": "长期复利核心",
+      "description": "最值得持续投入的研究与系统资产，优先产出可验证代码、测试和审计报告。",
+      "projects": [
+        {
+          "name": "quant",
+          "positioning": "大奖章级量化系统主仓库，覆盖加密策略、Polymarket、回测引擎和风控雏形。",
+          "path": "/home/gezhengewen/quant",
+          "status": "6 个加密策略 + Polymarket + 回测引擎 + 风控雏形；工作区存在 prompts/ 未跟踪目录。",
+          "nextStep": "做策略审计、未来函数检查、MA 策略重构、风控系统、walk-forward 与监控告警。"
+        },
+        {
+          "name": "qlib_project",
+          "positioning": "微软 Qlib 本地研究与实验环境。",
+          "path": "/home/gezhengewen/qlib_project",
+          "status": "工作区有本地修改，需要区分本地实验与上游 PR。",
+          "nextStep": "把本地修改固化为可复现实验报告，检查 robust_zscore 修复和测试，搭建 A 股策略实验模板。"
+        },
+        {
+          "name": "momentum_strategy",
+          "positioning": "A 股动量策略研究小仓库。",
+          "path": "/home/gezhengewen/momentum_strategy",
+          "status": "代码少且干净，尚需下载或接入 Qlib 数据并完成首次回测。",
+          "nextStep": "补数据检查、无数据 mock 回测、自测、README 与风险说明。"
+        }
+      ]
+    },
+    {
+      "tier": "A",
+      "name": "自动化与可展示产品",
+      "description": "把 AI Agent、生产力工具和高展示度 Demo 推进到可运行、可审查、可发布状态。",
+      "projects": [
+        {
+          "name": "feishu-recording-agent",
+          "positioning": "飞书录音处理 Agent，已启用的录音到知识库工作流。",
+          "path": "/home/gezhengewen/projects/feishu-recording-agent",
+          "status": "工作区有录音处理产物与 mock runtime 文件。",
+          "nextStep": "做边界审计、录音处理流程测试、mock 自动回归、知识库写入完整性检查和敏感信息脱敏。"
+        },
+        {
+          "name": "codex-observability-console",
+          "positioning": "Codex / Hermes 后台可观测控制台。",
+          "path": "/home/gezhengewen/projects/codex-observability-console",
+          "status": "体量很小但战略价值高。",
+          "nextStep": "把额度监控、会话列表、日志证据链和 git diff 概览做成真正可用的 dashboard。"
+        },
+        {
+          "name": "voice-interactive-agent",
+          "positioning": "语音互动知识库智能体。",
+          "path": "/home/gezhengewen/projects/voice-interactive-agent",
+          "status": "项目规划完整，但 runtime 可能包含大量依赖与环境文件，需要先瘦身和固化架构。",
+          "nextStep": "冻结架构、完成最小 WebSocket demo、抽象 ASR/TTS 接口并补测试计划。"
+        },
+        {
+          "name": "yijing-app",
+          "positioning": "易经起卦解卦全栈 App。",
+          "path": "/home/gezhengewen/projects/yijing-app",
+          "status": "前端 Vue/UniApp + 后端 FastAPI；已有核心引擎说明。",
+          "nextStep": "做传统原文完整性审计、API/前端联调、测试和部署说明。"
+        },
+        {
+          "name": "yijing-derivation",
+          "positioning": "易经数学、文王序可视化与论文型项目。",
+          "path": "/home/gezhengewen/yijing-derivation",
+          "status": "工作区干净，已有 README/CLAUDE，并带强制前提审计要求。",
+          "nextStep": "做数学叙事前提审计、交互页面 QA 和论文材料整理。"
+        },
+        {
+          "name": "yijing-all",
+          "positioning": "易经项目合集与整合仓库。",
+          "path": "/home/gezhengewen/yijing-all",
+          "status": "作为合集仓库，需要和 yijing-app、yijing-derivation 明确边界。",
+          "nextStep": "去重、统一 README，并明确各易经子项目的职责边界。"
+        },
+        {
+          "name": "AI 协作自我考古",
+          "positioning": "元认知与提示词工程展示页，用 AI 对话数据做自我分析框架展示。",
+          "path": "meta/ai-self-archaeology.html",
+          "link": "meta/ai-self-archaeology.html",
+          "linkLabel": "meta/ai-self-archaeology.html",
+          "status": "已有静态页面，可作为门户中的已发布 Demo。",
+          "nextStep": "接入统一门户索引，后续补截图、版本说明和案例入口。"
+        }
+      ]
+    },
+    {
+      "tier": "B",
+      "name": "内容产品与商业资产",
+      "description": "行业研究、客户资料和轻量互动内容，重点是素材边界、数据验证和静态发布质量。",
+      "projects": [
+        {
+          "name": "fengshui-interactive",
+          "positioning": "风水主题轻量交互页面和知识展示资产。",
+          "path": "/home/gezhengewen/fengshui-interactive",
+          "status": "待按统一静态站质量标准检查。",
+          "nextStep": "补移动端适配、README、截图和 GitHub Pages 发布检查。"
+        },
+        {
+          "name": "cybernetics-interactive",
+          "positioning": "控制论主题轻量交互页面和知识展示资产。",
+          "path": "/home/gezhengewen/cybernetics-interactive",
+          "status": "待按统一静态站质量标准检查。",
+          "nextStep": "补移动端适配、README、截图和 GitHub Pages 发布检查。"
+        },
+        {
+          "name": "qianxuesen-knowledge",
+          "positioning": "钱学森相关知识展示资产。",
+          "path": "/home/gezhengewen/qianxuesen-knowledge",
+          "status": "待整理展示结构和资料边界。",
+          "nextStep": "统一 README、素材索引、静态页面质量检查和发布说明。"
+        },
+        {
+          "name": "classic-rewrite-lab",
+          "positioning": "经典文本改写实验室。",
+          "path": "/home/gezhengewen/classic-rewrite-lab",
+          "status": "轻量内容产品资产，待固化展示入口。",
+          "nextStep": "整理样例、README、截图和静态发布检查。"
+        },
+        {
+          "name": "gamified-tasks",
+          "positioning": "任务游戏化轻量 Demo。",
+          "path": "/home/gezhengewen/gamified-tasks",
+          "status": "轻量交互资产，待检查体验闭环。",
+          "nextStep": "补移动端适配、README、截图和发布检查。"
+        },
+        {
+          "name": "mckinsey-framework",
+          "positioning": "麦肯锡框架知识展示资产。",
+          "path": "/home/gezhengewen/mckinsey-framework",
+          "status": "轻量知识展示项目，待统一质量标准。",
+          "nextStep": "补 README、截图、页面 QA 与 GitHub Pages 发布检查。"
+        },
+        {
+          "name": "australia-matching",
+          "positioning": "澳洲留学匹配系统。",
+          "path": "/home/gezhengewen/australia-matching",
+          "status": "匹配引擎完整，数据核实待做。",
+          "nextStep": "完成数据验证清单、Go8 优先核验、匹配解释报告和部署脚本检查。"
+        },
+        {
+          "name": "huaqiangbei-ic",
+          "positioning": "华强北 IC 指数与 AI 硬件 365 原型。",
+          "path": "/home/gezhengewen/huaqiangbei-ic",
+          "status": "已有价格指数、STM32 迁徙图和 AI 录音胸针 build。",
+          "nextStep": "审计数据抓取健壮性、指数方法论，并模板化 AI 硬件 build 流程。"
+        },
+        {
+          "name": "luxury 资产组",
+          "positioning": "奢侈品小程序、深圳豪宅报告和豪宅研究等商业内容资产。",
+          "path": "/home/gezhengewen/luxury-miniapp",
+          "status": "包含 luxury-miniapp、shenzhen-luxury-report、luxury-mansion-research，需防止素材混用。",
+          "nextStep": "只做整理、README、目录、素材索引和隐私边界。"
+        },
+        {
+          "name": "HIMCN 资产组",
+          "positioning": "himcn_miniapp 与 himcn_omnichannel 客户/商业项目资产。",
+          "path": "/home/gezhengewen/projects/himcn_miniapp",
+          "status": "商业项目资料，需按隐私边界处理。",
+          "nextStep": "只做目录、README、素材索引和项目边界说明。"
+        },
+        {
+          "name": "私有文档资产组",
+          "positioning": "宣传视频、老麦、家事案件资料等私有内容/客户资料。",
+          "path": "/home/gezhengewen/文档",
+          "status": "包含敏感或私有资料，不适合跨项目混用素材。",
+          "nextStep": "只做整理、索引和隐私边界说明，不复制或公开正文。"
+        }
+      ]
+    },
+    {
+      "tier": "C",
+      "name": "门户与资料库",
+      "description": "用于承载成果出口或索引资料的项目，主要动作是维护结构和审查边界。",
+      "projects": [
+        {
+          "name": "gzw1987-bit.github.io",
+          "positioning": "个人项目门户和 GitHub Pages 出口。",
+          "path": "/home/gezhengewen/gzw1987-bit.github.io",
+          "status": "本次更新目标仓库；已有 index.html 修改计划和 portfolio-data.json 数据出口。",
+          "nextStep": "把所有项目做成门户卡片，作为今日成果总出口；人工审查后再决定是否发布。"
+        },
+        {
+          "name": "vault",
+          "positioning": "Obsidian/资料库。",
+          "path": "/home/gezhengewen/vault",
+          "status": "文件多，dirty 约 40。",
+          "nextStep": "只做索引和备份检查，不让自动化乱改正文。"
+        }
+      ]
+    },
+    {
+      "tier": "D",
+      "name": "环境、学习与配置归档",
+      "description": "低优先级工具和配置资产，重点是风险提示、README 与密钥边界。",
+      "projects": [
+        {
+          "name": "scraper",
+          "positioning": "抓取工具或实验项目。",
+          "path": "/home/gezhengewen/scraper",
+          "status": "工具类资产，当前不适合消耗大量额度。",
+          "nextStep": "最多补 README、运行说明和风险提示。"
+        },
+        {
+          "name": "ubuntu_learning",
+          "positioning": "Ubuntu 学习与环境记录。",
+          "path": "/home/gezhengewen/ubuntu_learning",
+          "status": "学习类资产，低优先级。",
+          "nextStep": "整理 README 和目录索引即可。"
+        },
+        {
+          "name": "gemini-cli-env",
+          "positioning": "Gemini CLI 环境配置记录。",
+          "path": "/home/gezhengewen/gemini-cli-env",
+          "status": "环境类资产，需注意配置边界。",
+          "nextStep": "补 README、风险提示和密钥检查，不输出明文。"
+        },
+        {
+          "name": "wireguard 配置组",
+          "positioning": "WireGuard、wireguard_keys、wg-config 等网络配置资产。",
+          "path": "/home/gezhengewen/wireguard",
+          "status": "配置与密钥相关项目，不应主动修改或公开内容。",
+          "nextStep": "只做只读审计、README、风险提示和密钥存在性检查，不复制、不输出明文。"
+        }
+      ]
+    }
+  ]
+}
