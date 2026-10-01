@@ -1,120 +1,112 @@
 #!/bin/bash
 # Usage: ./publish.sh <源文件路径> <分类> <标题> <描述> [标签1,标签2,...]
-#
-# 示例:
-#   ./publish.sh ~/yijing-derivation/derivation-journey.html yijing "易经衍化之旅" "太极→384爻完整推演链路，13个交互阶段" "核心,交互,3400行"
-#   ./publish.sh ~/claude-journey.html meta "166天旅程全景" "Claude Code协作全旅程" "核心,交互"
-#
-# 取消发布:
-#   ./publish.sh --unpublish <路径>
-#   ./publish.sh --unpublish yijing/derivation-journey.html
-
-set -e
+# 分类: yijing / frameworks / research / meta / course
+# 取消发布: ./publish.sh --unpublish <分类/文件.html>
+set -euo pipefail
 SITE_DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$SITE_DIR"
 
-# === UNPUBLISH ===
-if [ "$1" = "--unpublish" ]; then
-  target="$2"
-  if [ -z "$target" ]; then
-    echo "Usage: $0 --unpublish <path>"
-    exit 1
-  fi
-  # Remove from published.json
-  python3 -c "
-import json,sys
-with open('published.json') as f: items=json.load(f)
-items=[i for i in items if i['path']!='$target']
-with open('published.json','w') as f: json.dump(items,f,ensure_ascii=False,indent=2)
-print(f'Removed $target. {len(items)} items remain.')
-"
-  # Remove file
-  rm -f "$target"
-  git add -A && git commit -m "unpublish: $target" && git push origin main
-  echo "Done. Unpublished: $target"
+if [ "${1-}" != "--unpublish" ] && [ "$#" -lt 3 ]; then
+  echo "用法: $0 <源文件> <分类> <标题> [描述] [标签]"
+  echo "分类: yijing / frameworks / research / meta / course"
+  echo "取消发布: $0 --unpublish <分类/文件.html>"
+  python3 - <<'PY'
+import json
+from pathlib import Path
+items = json.loads(Path('published.json').read_text(encoding='utf-8'))
+for item in items:
+    print(f"    {item['path']} — {item['title']}")
+PY
   exit 0
 fi
 
-# === PUBLISH ===
-SRC="$1"
-CATEGORY="$2"
-TITLE="$3"
-DESC="$4"
-TAGS="$5"
-
-if [ -z "$SRC" ] || [ -z "$CATEGORY" ] || [ -z "$TITLE" ]; then
-  echo ""
-  echo "  publish.sh — 发布一个页面到你的知识站"
-  echo ""
-  echo "  用法: ./publish.sh <源文件> <分类> <标题> <描述> [标签]"
-  echo ""
-  echo "  分类: yijing / frameworks / research / meta / course"
-  echo ""
-  echo "  示例:"
-  echo "    ./publish.sh ~/yijing-derivation/derivation-journey.html yijing \\"
-  echo "      \"易经衍化之旅\" \"太极→384爻完整推演\" \"核心,交互\""
-  echo ""
-  echo "  取消发布:"
-  echo "    ./publish.sh --unpublish yijing/derivation-journey.html"
-  echo ""
-  echo "  当前已发布:"
-  python3 -c "
+# Pass text as arguments instead of interpolating it into Python source.
+DEST=$(python3 - "$@" <<'PY'
+import datetime
 import json
-with open('published.json') as f: items=json.load(f)
-if not items: print('    (无)')
-for i in items: print(f'    {i[\"path\"]}  —  {i[\"title\"]}')
-"
+import os
+from pathlib import Path, PurePosixPath
+import shutil
+import sys
+import tempfile
+
+categories = {'yijing', 'frameworks', 'research', 'meta', 'course'}
+root = Path.cwd().resolve()
+metadata = root / 'published.json'
+args = sys.argv[1:]
+
+def fail(message):
+    raise SystemExit('Error: ' + message)
+
+def safe_destination(value):
+    relative = PurePosixPath(value)
+    if (relative.is_absolute() or len(relative.parts) != 2 or
+            relative.parts[0] not in categories or
+            relative.suffix.lower() not in {'.html', '.htm'} or
+            any(ord(char) < 32 for char in value) or '\\' in value):
+        fail('路径必须为受支持的分类/HTML文件名')
+    destination = root / relative
+    if destination.is_symlink() or destination.parent.is_symlink():
+        fail('不允许发布或删除符号链接')
+    if not destination.resolve().is_relative_to(root):
+        fail('路径超出站点目录')
+    return destination, relative.as_posix()
+
+items = json.loads(metadata.read_text(encoding='utf-8'))
+if not isinstance(items, list):
+    fail('published.json 必须为列表')
+
+if args[0] == '--unpublish':
+    if len(args) != 2:
+        fail('用法: --unpublish <分类/文件.html>')
+    destination, relative = safe_destination(args[1])
+    if not any(item.get('path') == relative for item in items):
+        fail('该路径未登记为已发布页面')
+    items = [item for item in items if item.get('path') != relative]
+    destination.unlink(missing_ok=True)
+else:
+    if not 3 <= len(args) <= 5:
+        fail('用法: <源文件> <分类> <标题> [描述] [标签]')
+    source, category, title = args[:3]
+    description = args[3] if len(args) > 3 else ''
+    tags = args[4] if len(args) > 4 else ''
+    if not title.strip():
+        fail('标题不能为空')
+    source = Path(source).expanduser()
+    if not source.is_file():
+        fail('源文件不存在')
+    destination, relative = safe_destination(category + '/' + source.name)
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    if source.resolve() != destination.resolve():
+        shutil.copyfile(source, destination)
+    items = [item for item in items if item.get('path') != relative]
+    items.insert(0, {'path': relative, 'title': title, 'desc': description,
+        'tags': [tag.strip() for tag in tags.split(',') if tag.strip()],
+        'date': datetime.date.today().isoformat(), 'category': category})
+
+# Replace metadata atomically after validating all arguments.
+with tempfile.NamedTemporaryFile(mode='w', encoding='utf-8', dir=root, delete=False) as file:
+    json.dump(items, file, ensure_ascii=False, indent=2)
+    file.write('\n')
+    temporary = file.name
+try:
+    os.replace(temporary, metadata)
+finally:
+    if Path(temporary).exists():
+        Path(temporary).unlink()
+print(relative)
+PY
+)
+
+git add -- published.json "$DEST"
+if git diff --cached --quiet -- published.json "$DEST"; then
+  echo "页面与索引没有变更。"
   exit 0
 fi
-
-# Validate source file
-if [ ! -f "$SRC" ]; then
-  echo "Error: $SRC not found"
-  exit 1
+if [ "${1-}" = "--unpublish" ]; then
+  git commit --only -m "unpublish: $DEST" -- published.json "$DEST"
+else
+  git commit --only -m "publish: $3" -- published.json "$DEST"
 fi
-
-# Create category dir
-mkdir -p "$CATEGORY"
-
-# Copy file
-FILENAME=$(basename "$SRC")
-DEST="$CATEGORY/$FILENAME"
-cp "$SRC" "$DEST"
-echo "Copied: $SRC → $DEST"
-
-# Update published.json
-DATE=$(date '+%Y-%m-%d')
-python3 -c "
-import json
-with open('published.json') as f: items=json.load(f)
-
-# Remove existing entry for same path (update)
-items=[i for i in items if i['path']!='$DEST']
-
-tags='$TAGS'.split(',') if '$TAGS' else []
-tags=[t.strip() for t in tags if t.strip()]
-
-items.insert(0, {
-    'path': '$DEST',
-    'title': '$TITLE',
-    'desc': '$DESC',
-    'tags': tags,
-    'date': '$DATE',
-    'category': '$CATEGORY'
-})
-
-with open('published.json','w') as f:
-    json.dump(items, f, ensure_ascii=False, indent=2)
-print(f'published.json updated. Total: {len(items)} items.')
-"
-
-# Git commit and push
-git add -A
-git commit -m "publish: $TITLE"
 git push origin main
-
-echo ""
-echo "Published! Will be live in ~1 min at:"
-echo "  https://gzw1987-bit.github.io/$DEST"
-echo ""
-echo "Homepage: https://gzw1987-bit.github.io/"
+echo "完成: https://gzw1987-bit.github.io/$DEST"
