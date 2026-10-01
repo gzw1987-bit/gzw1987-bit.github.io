@@ -271,11 +271,16 @@ function escapeHtml(value) {
 
 function makeLink(item) {
   const label = escapeHtml(item.linkLabel || item.path || item.link || '');
-  const href = item.link || item.path;
+  const href = String(item.link || item.path || '').trim();
   if (!href) return '<span class="field-value">待补充</span>';
-  const isRelative = !/^([a-z]+:)?\/\//i.test(href) && !href.startsWith('/');
+  // Local workstation paths remain labels; only safe site paths and web URLs link out.
+  const isRelative = !/^[a-z][a-z0-9+.-]*:/i.test(href) &&
+    !href.startsWith('/') && !href.includes('\\') && !/[\u0000-\u0020]/.test(href);
   if (isRelative) {
     return `<a class="path-link field-value" href="${escapeHtml(href)}">${label}</a>`;
+  }
+  if (/^https?:\/\//i.test(href)) {
+    return `<a class="path-link field-value" href="${escapeHtml(href)}" target="_blank" rel="noopener noreferrer">${label}</a>`;
   }
   return `<span class="field-value">${label}</span>`;
 }
