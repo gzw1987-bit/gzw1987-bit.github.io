@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Zhengwen 项目组合 | 量化系统 / AI Agent / 内容产品 / 基础设施</title>
+<title>Zhengwen | AI 业务系统 · 易经数学 · 独立开发</title>
 <style>
 :root {
   --bg: #f6f4ef;
@@ -233,22 +233,22 @@ h1 {
 <main class="shell">
   <header class="topbar">
     <div class="brand">Zhengwen Portfolio</div>
-    <div class="source">数据源：2026-06-11 Codex 额度消耗项目作战计划</div>
+    <div class="source"><a class="path-link" href="https://github.com/gzw1987-bit" target="_blank" rel="noopener noreferrer">GitHub @gzw1987-bit</a></div>
   </header>
 
   <section class="hero" aria-labelledby="page-title">
     <div>
-      <div class="eyebrow">量化系统 / AI Agent / 内容产品 / 基础设施</div>
-      <h1 id="page-title">Zhengwen 的可发布项目门户</h1>
+      <div class="eyebrow">AI 工作流 / 易经数学与产品 / 独立开发</div>
+      <h1 id="page-title">Zhengwen 的公开项目门户</h1>
       <p class="intro">
-        将核心研究、自动化系统、商业内容资产与环境配置统一纳入分层视图。每张卡片都保留项目定位、路径或链接、当前状态与下一步，方便审查、排期和发布。
+        用 AI 搭建可验证的业务系统、知识沉淀工作流与数字人文产品。以下展示当前公开发布与持续演进的核心方向。
       </p>
     </div>
     <div class="stats" aria-label="项目统计">
-      <div class="stat"><strong id="project-count">0</strong><span>收录项目</span></div>
-      <div class="stat"><strong>5</strong><span>S/A/B/C/D 分层</span></div>
-      <div class="stat"><strong>4</strong><span>核心方向</span></div>
-      <div class="stat"><strong>0</strong><span>本页不触发发布</span></div>
+      <div class="stat"><strong id="project-count">0</strong><span>展示项目</span></div>
+      <div class="stat"><strong id="group-count">0</strong><span>核心板块</span></div>
+      <div class="stat"><strong id="updated-at">-</strong><span>最近更新</span></div>
+      <div class="stat"><strong>GitHub</strong><span><a class="path-link" href="https://github.com/gzw1987-bit" target="_blank" rel="noopener noreferrer">查看开源主页 →</a></span></div>
     </div>
   </section>
 
@@ -256,7 +256,7 @@ h1 {
   <section id="portfolio" aria-live="polite"></section>
 
   <footer class="footer">
-    静态门户仅展示项目索引；不包含密钥、业务正文或客户素材内容。
+    本页仅展示公开项目与能力索引；合作交流或试用演示可通过 <a class="path-link" href="https://github.com/gzw1987-bit" target="_blank" rel="noopener noreferrer">GitHub @gzw1987-bit</a> 联系。
   </footer>
 </main>
 
@@ -270,9 +270,13 @@ function escapeHtml(value) {
 }
 
 function makeLink(item) {
-  const label = escapeHtml(item.linkLabel || item.path || item.link || '');
-  const href = item.link || item.path;
-  if (!href) return '<span class="field-value">待补充</span>';
+  const label = escapeHtml(item.linkLabel || item.link || '');
+  const href = item.link || '';
+  if (!href && !label) return '<span class="field-value">待补充</span>';
+  if (!href) return `<span class="field-value">${label}</span>`;
+  if (/^https:\/\//i.test(href)) {
+    return `<a class="path-link field-value" href="${escapeHtml(href)}" target="_blank" rel="noopener noreferrer">${label}</a>`;
+  }
   const isRelative = !/^([a-z]+:)?\/\//i.test(href) && !href.startsWith('/');
   if (isRelative) {
     return `<a class="path-link field-value" href="${escapeHtml(href)}">${label}</a>`;
@@ -307,6 +311,8 @@ function render() {
   );
   document.getElementById('project-count').textContent =
     state.data.groups.reduce((sum, group) => sum + group.projects.length, 0);
+  document.getElementById('group-count').textContent = state.data.groups.length;
+  document.getElementById('updated-at').textContent = state.data.updatedAt || '-';
   renderFilters(state.data.groups);
   if (!groups.length) {
     root.innerHTML = '<div class="empty">没有匹配的项目。</div>';
@@ -328,7 +334,7 @@ function render() {
             <p class="positioning">${escapeHtml(item.positioning)}</p>
             <div class="meta">
               <div>
-                <span class="field-label">路径 / 链接</span>
+                <span class="field-label">访问入口 / 形态</span>
                 ${makeLink(item)}
               </div>
               <div>
